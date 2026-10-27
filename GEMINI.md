@@ -1,7 +1,7 @@
 GEMINI.md
 
 # Goal
-Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / electronics to lower the fan speed. If necessary provide a decompiled firmware of the PUZ-WM85VAA or FTC6.
+Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / electronics to lower the fan speed. If necessary provide a decompiled firmware of the PUZ-WM85VAA or FTC6. Document all explored and discarded options as well as the discovery process.
 
 # Structure
 - `CONCEPT.md`: The overall structure of the product, including Business & Use Cases as well as the High-Level Architecture.
