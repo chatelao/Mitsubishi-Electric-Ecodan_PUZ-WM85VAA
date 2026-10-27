@@ -20,7 +20,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 | **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ⏳     |
 | **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ⏳     |
 | **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation**          | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops        | ⏳     |
-| **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ⏳     |
+| **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ✅     |
 | **Phase 6: Field Integration, Field Verification & Acoustic Validation**               | Install interceptor/patched firmware on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal validation       | ⏳     |
 
 ---
@@ -83,16 +83,16 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ---
 
-### Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation ⏳
+### Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation ✅
 
-- [ ] **Task 5.1: Develop Patching Tooling & Apply Fan Curve Modifications** ⏳
-  - [ ] Develop `/src/tools/patch_fan_rpm.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
-  - [ ] Patch target RPM table at `0xFFFD4120` to cap high-demand heating fan RPM from 1150 RPM to 780 RPM
-- [ ] **Task 5.2: CRC-16 Checksum Recalculation & ROM Validation** ⏳
-  - [ ] Develop `/src/tools/patch_checksum.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
-  - [ ] Recalculate CRC-16-CCITT checksum over `0xFFFC0000`–`0xFFFFFF7F` and patch non-vector ROM checksum word
-- [ ] **Task 5.3: Automated Testing & Binary Emulation** ⏳
-  - [ ] Run test suite under `/test/test_firmware_patch.py` verifying patch integrity and CRC validity
+- [x] **Task 5.1: Develop Patching Tooling & Apply Fan Curve Modifications** ✅
+  - [x] Develop `/src/tools/patch_fan_rpm.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
+  - [x] Patch target RPM table at `0xFFFD4120` to cap high-demand heating fan RPM from 1150 RPM to 780 RPM
+- [x] **Task 5.2: CRC-16 Checksum Recalculation & ROM Validation** ✅
+  - [x] Develop `/src/tools/patch_checksum.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
+  - [x] Recalculate CRC-16-CCITT checksum over `0xFFFC0000`–`0xFFFFFF7F` and patch non-vector ROM checksum word
+- [x] **Task 5.3: Automated Testing & Binary Emulation** ✅
+  - [x] Run test suite under `/test/test_firmware_patch.py` verifying patch integrity and CRC validity
 
 ---
 
