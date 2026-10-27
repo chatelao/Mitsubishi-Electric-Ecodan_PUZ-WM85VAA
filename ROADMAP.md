@@ -18,7 +18,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 | :------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :----- |
 | **Phase 1: Specification & System Interfaces**                                         | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol                            | ✅     |
 | **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ⏳     |
-| **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ⏳     |
+| **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ✅     |
 | **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation**          | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops        | ⏳     |
 | **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ✅     |
 | **Phase 6: Field Integration, Field Verification & Acoustic Validation**               | Install interceptor/patched firmware on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal validation       | ⏳     |
@@ -57,14 +57,14 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ---
 
-### Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping ⏳
+### Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping ✅
 
 - [x] **Task 3.1: Serial Interface Harness & Command Protocol Specification** ✅
   - [x] Construct JST-PA 5-pin serial interface cable for FTC6 `CN105` port
   - [x] Implement Python serial interface driver `/src/tools/cn105_controller.py` supporting `-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`
-- [ ] **Task 3.2: Automated Nighttime Capacity Capping Script** ⏳
-  - [ ] Develop scheduling module to send dynamic compressor capacity cap packets during designated nighttime window (22:00–07:00)
-  - [ ] Validate serial telemetry readout and verify absence of FTC6 communication alarm codes
+- [x] **Task 3.2: Automated Nighttime Capacity Capping Script** ✅
+  - [x] Develop scheduling module `/src/tools/nighttime_capper.py` to send dynamic compressor capacity cap packets during designated nighttime window (22:00–07:00)
+  - [x] Validate serial telemetry readout and verify absence of FTC6 communication alarm codes
 
 ---
 
