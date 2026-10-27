@@ -91,7 +91,7 @@ The Renesas RX architecture strictly separates CPU exceptions from peripheral in
 In an 8.5 kW R32 heat pump, reducing fan airflow $\dot{m}_{\text{air}}$ without bounding the refrigeration cycle load causes the evaporating temperature $T_{\text{evap}}$ to plummet, inducing rapid coil frosting and liquid slugging risk. Therefore, the patched target speed $N_{\text{target}}$ (applied synchronously to both fans) is governed by a coupled electro-thermal law:
 
 $$
-N_{\text{target}} = \max \left( N_{\text{safety\_floor}}, \, \min \left( \text{LUT}[f_{\text{comp}}][T_{\text{ambient}}] + \Delta_{\text{mode}}, \, N_{\text{acoustic\_cap}}(\Delta T_{\text{SH}}, \dot{T}_{\text{evap}}) \right) \right)
+N_{\text{target}} = \max \left( N_{\text{safety\_floor}}, \min \left( \text{LUT}[f_{\text{comp}}][T_{\text{ambient}}] + \Delta_{\text{mode}}, N_{\text{acoustic\_cap}}(\Delta T_{\text{SH}}, \dot{T}_{\text{evap}}) \right) \right)
 $$
 
 #### Mandatory Thermodynamic & Hardware Safety Overrides
