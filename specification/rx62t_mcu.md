@@ -61,3 +61,16 @@ Address Range          Size (Bytes)   Description
    - `MTU3 TGI2A`: Timer Compare Match generating $V_{\text{sp}}$ PWM speed commands for `CNF1`/`CNF2`.
    - `S12AD0`: 12-bit ADC conversion complete interrupt (sampling $T_{\text{evap}}$, $T_{\text{ambient}}$, $T_{\text{IPM}}$, $T_{\text{discharge}}$).
    - `SCI0`: Opto-isolated serial bus (`S2-S3`) communication interrupt.
+
+---
+
+## 5. References & Sources
+
+1. **Renesas RX62T Group User's Manual: Hardware**:
+   - https://www.renesas.com/en/products/microcontrollers-microprocessors/rx/rx600/rx62t
+2. **Renesas RX 32-Bit MCU Architecture Overview**:
+   - https://www.renesas.com/en/products/microcontrollers-microprocessors/rx
+3. **Renesas Flash Programmer (RFP) & Boot Mode Flash Specifications**:
+   - https://www.renesas.com/en/software-tool/renesas-flash-programmer-programming-gui
+4. **Ghidra Processor Module for Renesas RX Family**:
+   - https://ghidra-sre.org/

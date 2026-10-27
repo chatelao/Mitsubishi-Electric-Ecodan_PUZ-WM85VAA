@@ -45,3 +45,14 @@ SW1             OFF      OFF      OFF      OFF      Standard Factory Defrost & T
 
 - **Noise Reduction Delivered**: $\approx -3\text{ dB(A)}$ to $-5\text{ dB(A)}$ under moderate outdoor air temperatures.
 - **Limitation**: Factory DIP switch presets cannot lower fan RPM below $950\text{ RPM}$ under peak heat demand, requiring the Stage 1 Dual-Channel Interceptor or Stage 2 Firmware LUT Patch to enforce the $<35\text{ dB(A)}$ ($780\text{ RPM}$) acoustic ceiling.
+
+---
+
+## 4. References & Sources
+
+1. **Mitsubishi Electric PUZ-WM85VAA Service & Installation Manual**:
+   - https://les.mitsubishielectric.co.uk/
+2. **Mitsubishi Electric Outdoor Unit Service Handbook (DIP Switch Functions)**:
+   - https://myelectricservice.mitsubishielectric.co.uk/
+3. **Ecodan Selection & Technical Guide**:
+   - https://ecodan.co.uk/
