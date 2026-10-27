@@ -1,0 +1,58 @@
+@startuml TOP_ARCHITECTURE
+!theme plain
+skinparam componentStyle uml2
+skinparam backgroundColor white
+skinparam BoxPadding 10
+
+title Mitsubishi Electric Ecodan PUZ-WM85VAA & FTC6 Fan Control System Architecture
+
+package "FTC6 Main Control Unit (Indoor / Main Interface)" {
+    [FTC6 Main Board (PAC-IF071B-E)] as FTC6
+    [CN105 Serial Port / Modbus Gateway] as CN105
+    [DIP Switches / Initial Settings] as FTC6_SW
+}
+
+package "PUZ-WM85VAA Outdoor Unit" {
+    package "Outdoor Inverter / Control PCB" {
+        [Renesas RX62T MCU (Control Logic)] as Outdoor_MCU
+        [DIP Switch Array (SW7 Silent Mode)] as Outdoor_SW
+        [Flash / EEPROM Memory (Target RPM Lookup)] as EEPROM
+        [Fan Motor Drive Inverter Circuit] as Drive_Circuit
+    }
+
+    package "Fan Subsystem" {
+        [BLDC Fan Motor (CNF1 / CNF2)] as Fan_Motor
+    }
+
+    package "Safety & Sensor Array" {
+        [Evaporator / Ambient Temp Sensors (TH3/TH4/TH7)] as Sensors
+        [Defrost Control Loop] as Defrost_Module
+    }
+}
+
+package "Auxiliary / Secondary Interventions" {
+    [Microcontroller PWM Interceptor (Fallback)] as Interceptor
+    [Ghidra Decompilation & Binary Patch Toolchain] as Toolchain
+}
+
+' Data & Signal Flow Connections
+FTC6 <--> CN105 : Serial Communication (CN105 Protocol / Modbus)
+CN105 <--> Outdoor_MCU : Target Operating Mode & Demand
+FTC6_SW --> FTC6 : System Configuration
+
+Sensors --> Outdoor_MCU : Thermal Data (TH3, TH4, TH7)
+Defrost_Module --> Outdoor_MCU : Defrost Cycle Signals
+Outdoor_SW --> Outdoor_MCU : Hardwired Silent / Low-Noise Config
+
+Outdoor_MCU <--> EEPROM : Target RPM Table Read & Calibration Data
+Outdoor_MCU --> Drive_Circuit : PWM Control Target Signal
+Drive_Circuit --> Fan_Motor : 3-Phase BLDC Motor Drive Signal (CNF1)
+Fan_Motor --> Outdoor_MCU : Hall-Effect RPM Feedback Signal (FG / CNF2)
+
+' Intervention Paths
+Toolchain .> EEPROM : Binary Extraction & Patched Reflash (Primary Approach)
+Drive_Circuit .> Interceptor : Intercepted PWM Output Signal (Fallback Approach)
+Interceptor .> Fan_Motor : Modified PWM Drive Signal
+Fan_Motor .> Interceptor : Synthesized Hall Feedback Signal
+
+@enduml
