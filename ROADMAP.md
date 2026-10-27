@@ -1,15 +1,14 @@
 # Project Roadmap (ROADMAP.md)
 
-This roadmap outlines the implementation phases, objectives, and task schedule for modifying the **Mitsubishi Electric Ecodan PUZ-WM85VAA** outdoor unit fan speed parameters, software control logic, and hardware interfaces in conjunction with the **FTC6** controller.
+This roadmap outlines the implementation phases, objectives, and task schedule for modifying the **Mitsubishi Electric Ecodan PUZ-WM85VAA** outdoor unit fan speed parameters, software control logic, and hardware interfaces in conjunction with the **FTC6** controller, adhering to the Inverted Staged Hybrid Approach specified in `CONCEPT.md` and `DESIGN.md`.
 
 ---
 
 ## Goals
 
-- ⏳ **Primary Goal**: Reduce operational fan noise of the Mitsubishi Electric Ecodan PUZ-WM85VAA heat pump outdoor unit by lowering target fan RPM during high-demand and nighttime operation while preserving critical safety logic (defrost airflow minimums and IPM thermal protection).
-- ⏳ **Firmware Reverse Engineering & Patching**: Decompile, analyze, and surgical patch the PUZ-WM85VAA outdoor unit MCU firmware target RPM tables and CRC checksum recalculation logic.
-- ⏳ **Software & Parameter Configuration**: Analyze native DIP switch (SW7/SW1) settings and CN105 serial protocol interfaces for parameter-based fan speed constraints.
-- ⏳ **Fallback Hardware Interceptor**: Develop an inline microcontroller signal interceptor board (ATtiny1616-based $V_{\text{sp}}$ attenuation & synthetic FG pulse generation) to circumvent MCU write-protection if required.
+- 🚧 **Primary Goal**: Reduce operational fan noise of the Mitsubishi Electric Ecodan PUZ-WM85VAA heat pump outdoor unit by lowering target fan RPM during high-demand and nighttime operation (<35 dB(A) sound pressure at 3 meters) while preserving critical safety logic (suction superheat collapse prevention, defrost airflow minimums, and IPM thermal protection).
+- ⏳ **Stage 1 (Primary): Hardware Interceptor & CN105 Capping**: Develop and deploy a dual-channel inline microcontroller signal interceptor board (ATtiny1616-based $V_{\text{sp}}$ attenuation & synthetic $FG$ pulse generation) on connectors `CNF1`/`CNF2` combined with indoor `CN105` serial thermal load capping.
+- ⏳ **Stage 2 (Advanced): Firmware Reverse Engineering & Patching**: Inspect Renesas RX62T 128-bit ID-code protection (`0xFFFFFFA0`), extract code flash (`0xFFFC0000`–`0xFFFFFFFF`), decompile in Ghidra v11.x, patch fan target lookup tables (`0xFFFD4120`), recalculate CRC-16-CCITT checksums via script, and reflash the MCU.
 
 ---
 
@@ -17,85 +16,90 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 | Phase | Description | Status |
 | :--- | :--- | :--- |
-| **Phase 1: Specification & Hardware Interfaces** | Document pinouts, MCU specs, memory maps, DIP switches, and serial interfaces | 🚧 |
-| **Phase 2: Toolchain & Binary Analysis Setup** | Setup Ghidra/radare2 environment, binary patching scripts (`patch_checksum.py`), and CI workflow | ⏳ |
-| **Phase 3: Firmware Decompilation & Target Logic Analysis** | Extract MCU binary, decompile RX62T/M16C code, locate target RPM tables (`0xFFFD4120`), and map safety checks | ⏳ |
-| **Phase 4: Firmware Patching, Checksum Recalculation & Emulation** | Patch RPM target curves (1150 RPM cap to 780 RPM), recalculate CRC16 checksums, and verify via tests | ⏳ |
-| **Phase 5: Fallback Hardware Interceptor Subsystem** | Design ATtiny1616 schematic/PCB for inline $V_{\text{sp}}$ modulation and synthetic FG pulse generation (preventing `P8`/`P9` fault codes) | ⏳ |
-| **Phase 6: Integration, Field Testing & Acoustic Validation** | Deploy firmware/hardware patches on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal/defrost validation | ⏳ |
+| **Phase 1: Specification & System Interfaces** | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol | 🚧 |
+| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor** | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis | ⏳ |
+| **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping** | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours | ⏳ |
+| **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation** | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops | ⏳ |
+| **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ⏳ |
+| **Phase 6: Field Integration, Field Verification & Acoustic Validation** | Install interceptor/patched firmware on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal validation | ⏳ |
 
 ---
 
 ## Phases & Detailed Tasks
 
-### Phase 1: Specification & Hardware Interfaces 🚧
+### Phase 1: Specification & System Interfaces 🚧
 
-- [ ] **Task 1.1: Document System Architecture and Connector Specifications** ⏳
-  - [ ] Document CNF1/CNF2 fan motor connector pinouts ($V_{\text{cc\_HV}}$, $V_{\text{cc\_logic}}$, $V_{\text{sp}}$, $FG$) in `/specification/`
-  - [ ] Document CN105 serial interface pinouts, baud rates (2400/9600 8N1), and packet structures
+- [ ] **Task 1.1: Document System Architecture and Dual Connector Specifications** ⏳
+  - [ ] Document `CNF1` (Upper Fan) and `CNF2` (Lower Fan) 6-pin connector specifications (340V DC `Vcc_HV`, 15V `Vcc_Logic`, 0–6.5V $V_{\text{sp}}$, 0–5V $FG$) in `/specification/cnf_pinout.md`
+  - [ ] Document indoor `CN105` serial interface pinouts, baud rates (2400/9600 8E1), and packet structures in `/specification/cn105_protocol.md`
 - [ ] **Task 1.2: Define MCU Hardware Architecture & Memory Maps** ⏳
-  - [ ] Specify Renesas RX62T / M16C CPU registers, clock scaling (12 MHz xtal, 96 MHz ICLK), and pin package specs
-  - [ ] Define ROM (`0xFFFC0000`), Data Flash (`0x00100000`), SRAM (`0x00000000`), and Vector Table layout in `/specification/`
+  - [ ] Specify Renesas RX62T (`R5F562TxxDFP`) registers, 12 MHz oscillator / 96 MHz ICLK, and 100-pin LQFP pinout in `/specification/rx62t_mcu.md`
+  - [ ] Define Code Flash (`0xFFFC0000`), Data Flash (`0x00100000`), SRAM (`0x00000000`), Fixed Vectors (`0xFFFFFF80`), and 128-bit ID-Code Security location (`0xFFFFFFA0`)
 - [ ] **Task 1.3: Document Factory DIP Switch & Service Parameters** ⏳
-  - [ ] Map SW7 Silent Mode bit settings (Bit 1: -3 dB(A), Bit 2: -5 dB(A)) and SW1 demand control options
+  - [ ] Map `SW7` Silent Mode bit settings (Bit 1: -3 dB(A), Bit 2: Capacity Override) and `SW1` demand control options in `/specification/dip_switches.md`
 
 ---
 
-### Phase 2: Toolchain & Binary Analysis Setup ⏳
+### Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor ⏳
 
-- [ ] **Task 2.1: Establish Reverse Engineering Analysis Environment** ⏳
-  - [ ] Configure Ghidra v10.x with Renesas RX62T architecture module and memory map layout
-  - [ ] Initialize decompilation source structure under `/src/firmware/` and build output directory under `/build/`
-- [ ] **Task 2.2: Develop Checksum & CRC Verification Tooling** ⏳
-  - [ ] Implement `/src/tools/patch_checksum.py` supporting `-i/--input`, `-o/--output`, `-c/--check-only` flags for CCITT-16 CRC recalculation
-  - [ ] Add unit tests under `/test/` for CRC recalculation and patch verification
-
----
-
-### Phase 3: Firmware Decompilation & Target Logic Analysis ⏳
-
-- [ ] **Task 3.1: Extract and Disassemble Outdoor Unit Firmware** ⏳
-  - [ ] Dump Flash ROM (`0xFFFC0000` - `0xFFFFFFFF`) via hardware programming header
-  - [ ] Disassemble entry point `_start` (`0xFFFFFFFC`) and main control loop
-- [ ] **Task 3.2: Map Fan RPM Target Calculation Routines** ⏳
-  - [ ] Locate RPM target lookup table at Flash ROM address `0xFFFD4120`
-  - [ ] Reverse engineer $\text{RPM}_{\text{target}} = f(f_{\text{comp}}, T_{\text{ambient}}, T_{\text{evap}})$ algorithm and mode offset parameters
-- [ ] **Task 3.3: Analyze Safety Logic & Diagnostic Fault Codes** ⏳
-  - [ ] Trace defrost cycle safety routines ($T_{\text{evap}} < -5^\circ\text{C} \implies \text{RPM}_{\text{target}} \ge 850$)
-  - [ ] Trace IPM thermal protection ($T_{\text{IPM}} > 85^\circ\text{C} \implies \text{RPM}_{\text{target}} \ge 1100$)
-  - [ ] Document `P8` and `P9` fan motor FG feedback fault detection thresholds
+- [ ] **Task 2.1: Circuit Schematic & PCB Design** ⏳
+  - [ ] Design ATtiny1616 dual-channel schematic in PlantUML / KiCad under `/src/hardware/`
+  - [ ] Design $0.6875\times$ resistor divider ($R_1=10\text{ k}\Omega, R_2=22\text{ k}\Omega$) with 5.1V Zener clamp scaling $6.5\text{V}$ $V_{\text{sp}}$ to $4.47\text{V}$ for 5V ADC
+  - [ ] Design dual MCP6002 OpAmp gain stage ($G=1.50$) powered from 15V `Vcc_Logic` rail restoring $0\text{–}6.5\text{V}$ DAC dynamic range
+  - [ ] Design open-drain MOSFET driver for $FG$ pulse output synthesis and NC DPDT fail-safe relay circuit
+- [ ] **Task 2.2: Interceptor Firmware Implementation** ⏳
+  - [ ] Implement ATtiny1616 embedded code under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.68 - 1.0$)
+  - [ ] Implement closed-loop tachometer pulse measurement (`FG_in`) and pulse ratio synthesis (`FG_out = FG_in / k`)
+  - [ ] Implement active stall passthrough (`FG_out = LOW` if $f_{\text{actual}} < 10\text{ Hz}$ while $V_{\text{sp}} > 1.8\text{V}$)
+  - [ ] Implement Watchdog Timer (WDT) and NTC thermistor freeze override ($T_{\text{evap}} < -3^\circ\text{C}$) driving NC relay bypass
+- [ ] **Task 2.3: Interceptor Bench Verification** ⏳
+  - [ ] Simulate and test interceptor board on signal test bench under `/test/test_interceptor.py` with CLI flags `-i/--input`, `-o/--output`, `-v/--verbose`
 
 ---
 
-### Phase 4: Firmware Patching, Checksum Recalculation & Emulation ⏳
+### Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping ⏳
 
-- [ ] **Task 4.1: Implement Fan Target Curve Firmware Patch** ⏳
-  - [ ] Create patch script `/src/tools/patch_fan_rpm.py` with `-i/--input` and `-o/--output` flags
-  - [ ] Cap high-load target RPM from 1150 RPM to 780 RPM while preserving defrost/IPM override branches
-- [ ] **Task 4.2: Validate Binary Integrity & Checksum Recalculation** ⏳
-  - [ ] Recalculate CCITT-16 CRC at address `0xFFFFFFBE` and generate patched binary in `/build/`
-- [ ] **Task 4.3: Emulate and Unit Test Patched Logic** ⏳
-  - [ ] Run test suite under `/test/` verifying patched binary against synthetic inputs (ambient temp, compressor frequency)
-
----
-
-### Phase 5: Fallback Hardware Interceptor Subsystem ⏳
-
-- [ ] **Task 5.1: Circuit Schematic & PCB Design** ⏳
-  - [ ] Create ATtiny1616 schematic in PlantUML / KiCad under `/src/hardware/` for $V_{\text{sp}}$ ADC sampling and PWM/DAC output attenuation
-  - [ ] Design FG feedback pulse generation circuit ($f_{\text{synth}} = f_{\text{actual}} / k$)
-- [ ] **Task 5.2: Interceptor Firmware Implementation** ⏳
-  - [ ] Implement ATtiny1616 embedded logic under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.65 - 0.80$)
-  - [ ] Implement synthetic FG pulse counter/generator to prevent main PCB `P8`/`P9` diagnostic trip
-- [ ] **Task 5.3: Hardware Interceptor Verification** ⏳
-  - [ ] Simulate and test interceptor board on signal test bench under `/test/`
+- [ ] **Task 3.1: Serial Interface Harness & Command Protocol Specification** ⏳
+  - [ ] Construct JST-PA 5-pin serial interface cable for FTC6 `CN105` port
+  - [ ] Implement Python serial interface driver `/src/tools/cn105_controller.py` supporting `-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`
+- [ ] **Task 3.2: Automated Nighttime Capacity Capping Script** ⏳
+  - [ ] Develop scheduling module to send dynamic compressor capacity cap packets during designated nighttime window (22:00–07:00)
+  - [ ] Validate serial telemetry readout and verify absence of FTC6 communication alarm codes
 
 ---
 
-### Phase 6: Integration, Field Testing & Acoustic Validation ⏳
+### Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation ⏳
 
-- [ ] **Task 6.1: Flashing & Hardware Installation** ⏳
-  - [ ] Program patched MCU firmware onto PUZ-WM85VAA outdoor unit board (or install hardware interceptor)
-- [ ] **Task 6.2: Operational & Acoustic Field Verification** ⏳
-  - [ ] Verify nighttime noise levels meet target (<35 dB(A) at 3 meters)
-  - [ ] Validate defrost cycle activation and IPM temperature boundaries under real heat load conditions
+- [ ] **Task 4.1: Silicon Inspection & ID-Code Protection Gate** ⏳
+  - [ ] Perform non-destructive visual and JTAG/SCI probe check of 128-bit ID-code location (`0xFFFFFFA0`) to verify protection status (`0xFF...FF`)
+- [ ] **Task 4.2: Extract and Decompile Outdoor Unit Firmware** ⏳
+  - [ ] Dump Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) via hardware programming header into `/build/puz_wm85vaa_factory.bin`
+  - [ ] Load binary into Ghidra v11.x using Renesas RX processor module and `rx62t_rom.ld` linker script
+- [ ] **Task 4.3: Map Fan Target RPM Tables & Closed-Loop Safety Guards** ⏳
+  - [ ] Locate target RPM lookup table array at `0xFFFD4120`
+  - [ ] Map superheat collapse protection routine ($\Delta T_{\text{SH}} < 3.5\text{ K} \implies$ ramp RPM to 1150)
+  - [ ] Map defrost frost rate threshold ($T_{\text{evap}} < -4.0^\circ\text{C}$ and $\frac{dT_{\text{evap}}}{dt} < -0.3\text{ K/min} \implies \text{RPM} \ge 850$)
+  - [ ] Map IPM thermal override ($T_{\text{IPM}} > 80^\circ\text{C} \implies \text{RPM} = 1100$)
+
+---
+
+### Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation ⏳
+
+- [ ] **Task 5.1: Develop Patching Tooling & Apply Fan Curve Modifications** ⏳
+  - [ ] Develop `/src/tools/patch_fan_rpm.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
+  - [ ] Patch target RPM table at `0xFFFD4120` to cap high-demand heating fan RPM from 1150 RPM to 780 RPM
+- [ ] **Task 5.2: CRC-16 Checksum Recalculation & ROM Validation** ⏳
+  - [ ] Develop `/src/tools/patch_checksum.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`)
+  - [ ] Recalculate CRC-16-CCITT checksum over `0xFFFC0000`–`0xFFFFFF7F` and patch non-vector ROM checksum word
+- [ ] **Task 5.3: Automated Testing & Binary Emulation** ⏳
+  - [ ] Run test suite under `/test/test_firmware_patch.py` verifying patch integrity and CRC validity
+
+---
+
+### Phase 6: Field Integration, Field Verification & Acoustic Validation ⏳
+
+- [ ] **Task 6.1: Hardware Deployment & Reflashing** ⏳
+  - [ ] Install Stage 1 Dual-Channel Hardware Interceptor or flash Stage 2 patched firmware onto PUZ-WM85VAA outdoor unit
+- [ ] **Task 6.2: Operational, Acoustic & Safety Verification** ⏳
+  - [ ] Measure sound pressure level during maximum heating demand at 3 meters (Target: $<35\text{ dB(A)}$)
+  - [ ] Conduct frost chamber / low ambient field trial verifying defrost activation, superheat stability, and zero diagnostic error codes (`P8`/`P9`)
