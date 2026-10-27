@@ -71,15 +71,19 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 ### Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation ⏳
 
 - [ ] **Task 4.1: Silicon Inspection & ID-Code Protection Gate** ⏳
-  - [ ] Perform non-destructive visual and JTAG/SCI probe check of 128-bit ID-code location (`0xFFFFFFA0`) to verify protection status (`0xFF...FF`)
+  - [ ] Perform non-destructive visual package inspection of the Renesas RX62T MCU on outdoor PCB
+  - [ ] Measure voltage levels on `EMLE`, `MD0`, `MD1`, and JTAG/SCI programming header pins
+  - [ ] Perform hardware probe readout check of 128-bit ID-code location (`0xFFFFFFA0`) to verify protection status (`0xFF...FF` vs. locked)
 - [ ] **Task 4.2: Extract and Decompile Outdoor Unit Firmware** ⏳
-  - [ ] Dump Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) via hardware programming header into `/build/puz_wm85vaa_factory.bin`
-  - [ ] Load binary into Ghidra v11.x using Renesas RX processor module and `rx62t_rom.ld` linker script
+  - [ ] Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) to outdoor unit programming header
+  - [ ] Read Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary dump file `/build/puz_wm85vaa_factory.bin`
+  - [ ] Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash
+  - [ ] Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script
 - [ ] **Task 4.3: Map Fan Target RPM Tables & Closed-Loop Safety Guards** ⏳
-  - [ ] Locate target RPM lookup table array at `0xFFFD4120`
-  - [ ] Map superheat collapse protection routine ($\Delta T_{\text{SH}} < 3.5\text{ K} \implies$ ramp RPM to 1150)
-  - [ ] Map defrost frost rate threshold ($T_{\text{evap}} < -4.0^\circ\text{C}$ and $\frac{dT_{\text{evap}}}{dt} < -0.3\text{ K/min} \implies \text{RPM} \ge 850$)
-  - [ ] Map IPM thermal override ($T_{\text{IPM}} > 80^\circ\text{C} \implies \text{RPM} = 1100$)
+  - [ ] Map target RPM lookup table array at `0xFFFD4120` in Ghidra and verify 16-entry `uint16_t` matrix structure
+  - [ ] Disassemble suction superheat collapse protection subroutine ($\Delta T_{\text{SH}} < 3.5\text{ K} \implies$ ramp RPM to 1150)
+  - [ ] Disassemble defrost frost gradient evaluation routine ($T_{\text{evap}} < -4.0^\circ\text{C}$ and $\frac{dT_{\text{evap}}}{dt} < -0.3\text{ K/min} \implies \text{RPM} \ge 850$)
+  - [ ] Disassemble inverter IPM thermal override routine ($T_{\text{IPM}} > 80^\circ\text{C} \implies \text{RPM} = 1100$)
 
 ---
 
@@ -99,7 +103,13 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 ### Phase 6: Field Integration, Field Verification & Acoustic Validation ⏳
 
 - [ ] **Task 6.1: Hardware Deployment & Reflashing** ⏳
-  - [ ] Install Stage 1 Dual-Channel Hardware Interceptor or flash Stage 2 patched firmware onto PUZ-WM85VAA outdoor unit
+  - [ ] Mount Stage 1 Dual-Channel Hardware Interceptor PCB on outdoor unit housing
+  - [ ] Connect inline signal harnesses to `CNF1` and `CNF2` connectors and verify fail-safe relay unpowered bypass
+  - [ ] Reflash patched firmware onto Renesas RX62T MCU via programming header (if Stage 2 path is validated)
+  - [ ] Perform initial power-on self-test (POST) and check for fault indicator LEDs or diagnostic codes
 - [ ] **Task 6.2: Operational, Acoustic & Safety Verification** ⏳
-  - [ ] Measure sound pressure level during maximum heating demand at 3 meters (Target: $<35\text{ dB(A)}$)
-  - [ ] Conduct frost chamber / low ambient field trial verifying defrost activation, superheat stability, and zero diagnostic error codes (`P8`/`P9`)
+  - [ ] Measure outdoor acoustic sound pressure level (SPL) at 3 meters during peak heating demand using calibrated Class 1 sound level meter
+  - [ ] Confirm sound pressure level remains below $35\text{ dB(A)}$ target at 3 meters
+  - [ ] Perform low-ambient frost chamber / field trial to trigger active defrost cycles and verify defrost execution
+  - [ ] Verify zero diagnostic error codes (`P8` fan tachometer fault, `P9` fan motor abnormality, or refrigerant circuit alarms)
+  - [ ] Compile field verification log and acoustic performance validation report in `/specification/field_test_report.md`
