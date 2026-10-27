@@ -53,3 +53,16 @@ When inserting the Stage 1 Dual-Channel Interceptor module between `CNF1`/`CNF2`
 2. **`Vcc_Logic` (Pin 4)**: Powers the interceptor module's local 5V LDO voltage regulator.
 3. **`Vsp` (Pin 5)**: Intercepted via $0.6875\times$ resistor divider ($10\text{ k}\Omega / 22\text{ k}\Omega$) with $5.1\text{V}$ Zener clamp into the ATtiny1616 ADC, and re-generated via DAC + OpAmp ($G=1.5$) powered from Pin 4 ($15\text{V}$).
 4. **`FG` (Pin 6)**: Intercepted from motor tachometer output, conditioned via Schmitt trigger into ATtiny1616 timer capture, and synthesized back to main PCB via open-drain MOSFET ($f_{\text{synth}} = f_{\text{actual}} / k$).
+
+---
+
+## 5. References & Sources
+
+1. **Mitsubishi Electric Outdoor Unit Service Manuals (PUZ-WM85VAA / PUZ series)**:
+   - https://les.mitsubishielectric.co.uk/
+2. **Nidec / Shibaura DC BLDC Motor Interface & Pinout Specifications**:
+   - https://www.nidec.com/en/
+3. **Microchip ATtiny1616 Datasheet & Technical Specifications**:
+   - https://www.microchip.com/en-us/product/attiny1616
+4. **Texas Instruments Application Report: Driving BLDC Motors & Hall Sensor Speed Feedback**:
+   - https://www.ti.com/motor-drivers/overview.html

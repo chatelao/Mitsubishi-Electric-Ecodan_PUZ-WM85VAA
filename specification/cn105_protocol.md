@@ -67,3 +67,16 @@ The FTC6 responds to poll commands (`Command 0x03`) by broadcasting system state
 - **Evaporator Temperature ($T_{\text{evap}}$)**: Register `0x12` ($\text{Temp in } ^\circ\text{C} + 40$)
 - **Suction Superheat ($\Delta T_{\text{SH}}$)**: Register `0x15` (Kelvin x 10)
 - **Outdoor Fan Speed Status**: Register `0x1A` (Step 0..8)
+
+---
+
+## 5. References & Sources
+
+1. **SwiCago / HeatPump GitHub Repository (CN105 Protocol Analysis)**:
+   - https://github.com/SwiCago/HeatPump
+2. **ESPHome Mitsubishi CN105 Climate Component Documentation**:
+   - https://esphome.io/components/climate/mitsubishi_cn105.html
+3. **Mitsubishi Electric FTC6 Flow Temperature Controller Service Manual**:
+   - https://www.melcloud.com / https://les.mitsubishielectric.co.uk/
+4. **Ecodan PUZ-WM85VAA Service & Technical Manuals**:
+   - https://myelectricservice.mitsubishielectric.co.uk/
