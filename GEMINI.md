@@ -1,83 +1,75 @@
-GEMINI.md
-
 # Goal
 Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / electronics to lower the fan speed. If necessary provide a decompiled firmware of the PUZ-WM85VAA or FTC6. Document all explored and discarded options as well as the discovery process.
 
 # Structure
-- `CONCEPT.md`: The overall structure of the product, including Business & Use Cases as well as the High-Level Architecture.
-- `DESIGN.md`: The detailed design of the solution, including the architecture, used tech stack for development, production and testing, etc.
-- `TOP_ARCHITECTURE.puml`: The top-level component overview showing all major modules and the dataflows between them.
+- `CONCEPT.md`: The overall structure of the solution, including Use Cases (e.g. noise reduction, lower fan speed during night/low-load) and High-Level Approaches (Software parameter tuning, Firmware patching, Electronics/PWM hardware modification).
+- `DESIGN.md`: The detailed technical design of the chosen approach, including hardware schematics, firmware decompilation/memory maps, MCU architecture, signal interfaces, and toolchains.
+- `TOP_ARCHITECTURE.puml`: The top-level component overview showing all major hardware/software modules (PUZ-WM85VAA outdoor unit, FTC6 main controller, inverter driver, fan motor board) and dataflows/signals between them.
 - `ROADMAP.md`: The list of accomplished and planned steps of the project.
-- `TECHNICAL_DEBTS.md`: If you find technical debts, like outdate components, security flaws, old patterns, etc. log them here, but don’t fix them until asked to do so.
-- `README.md`: Add a link to the GitHub pages if any are produced / present.
-- `/specification/`: External Know-How as datasheet, standards, etc. Should be converted to Markdown if PDF, etc.
-- `/src/`: The source code of the project
-- `/test/`: All tools, configurations & test cases
-- `/build/`: Only temporary place for compilation, may be cached by Github
+- `TECHNICAL_DEBTS.md`: If you find technical debts, like outdated documentation, unknown register maps, or security/safety risks, log them here, but don’t fix them until asked to do so.
+- `README.md`: Overview of the repository and links to generated documentation or GitHub Pages if present.
+- `/specification/`: External datasheets, service manuals, register maps, standards, converted to Markdown where appropriate.
+- `/src/`: Firmware binaries, decompiled source code, hardware schematics/PCB designs, patch scripts, and custom tools.
+- `/test/`: Test benches, firmware emulation tests, signal validation scripts, and verification test cases.
+- `/build/`: Temporary directory for decompilation artifacts, disassemblies, binary outputs, or compiled patches.
 
 # `CONCEPT.md` handling
-- The `CONCEPT.md` add the business and use cases to the top Goal this file.
-- It contains an architecture with top-level functional components and their business interfaces.
-- It does not contain all precise implementation choices.
-- Every major choice is first drawn out as three alternatives, the best one is chosen and the ohter, discarded ones kept in summary in the last chapter of the concept.
+- The `CONCEPT.md` relates all trade-offs and functional choices back to the primary Goal.
+- It contains high-level operational concepts comparing:
+  1. Software / Parameter Configuration (e.g., DIP switches, service parameters, CN105/Modbus control commands).
+  2. Electronics / Hardware Modification (e.g., resistor dividers, PWM attenuators, motor signal interceptors).
+  3. Firmware Reverse Engineering & Modification (e.g., decompiling FTC6 / PUZ-WM85VAA control logic and patching fan target RPM tables).
+- Every major choice is first drawn out as three alternatives, the best one is chosen and the other, discarded ones kept in summary in the last chapter of the concept.
 
-# `DESIGN.md`: 
+# `DESIGN.md` handling
 - The `DESIGN.md` derives all necessary technological choices from `CONCEPT.md`.
-- It does contain precise implementation choices.
-- Every major choice is first drawn out as three alternatives, the best one is chosen and the ohter, discarded ones kept in summary in the last chapter of the concept.
+- It contains precise implementation choices, micro-architectural details, and circuit diagrams.
+- Every major choice is first drawn out as three alternatives, the best one is chosen and the other, discarded ones kept in summary in the last chapter of the concept.
 - It contains a detailed architecture of all components and their technical interfaces.
-- Included the TOP_ARCHITECTURE.puml` as dynamic-rendering image as soon as available.
+- Includes `TOP_ARCHITECTURE.puml` as a dynamically rendered image as soon as available.
 
-## REST-API
-- If the API is used, always regenerate the client SDKs and the server stubs from the original interface definitions
-- If there are OpenAPI definitions, render them with redocly to the GH page directory /apis.
-- If there are othe API definitions, render them with suitable tools to the GH page directory /apis too.
-- Verify and add descriptions to the API definitions until they are useable for any product manager / developer using them later.
-- If there are REST-APIs, describe them in `api/openapi.yaml`
-- If there are SOAP-APIs, describe them in `api/api.wsdl`
-- Keep the api definitions up-to-date with every system change
+## Firmware Decompilation & Reverse Engineering
+- Document MCU architecture, chip markings, crystal frequencies, Flash/EEPROM memory maps, and vector tables.
+- Use reverse engineering tools (e.g. Ghidra, radare2, binwalk) to analyze firmware binaries.
+- Keep decompiled pseudocode / assembly clean and well-commented in `/src/`.
+- Document fan speed calculation routines, PWM lookup tables, and safety threshold limits (e.g. defrost cycle, minimum airflow requirements).
+- Document checksum, CRC, or signature mechanisms used by the firmware, providing script utilities to recompute valid checksums for patched binaries.
 
-## Command-Line Interface (CLI)
-- Every option should be available as short and long form
+## Hardware & Electronics Design
+- Document connector pinouts (e.g., CN105, fan motor connections, power boards, sensor lines).
+- Provide circuit schematics (PlantUML or KiCad) for hardware interventions (e.g., signal attenuation, microcontroller-based signal interceptors).
+- Document DIP switch configurations and jumper settings affecting fan modes or operating limits.
 
-## Database
-- If SQL statements are required, use the oldest, most common standard dialect available to improve cross-plattform compatibility.
-- Draw database schematics as plantUML entities with crowfoot notation.
+## Communication Protocols & Interfaces
+- Document protocol register maps (e.g., CN105 serial protocol, M-Net, Modbus RTU/TCP).
+- Define message formats, register addresses, and parameter bounds relevant to fan speed control.
+- Ensure all serial/bus communication parameters are precisely documented for reproducible analysis.
 
-## GUI / UI
-- Create screenshots of each UI step tested and store it as asset of the Action Workflow for review
-
-
+## Command-Line Tools & Scripts
+- Every command-line tool or decompilation/patch script should support both short and long flag options (e.g. `-i` / `--input`, `-o` / `--output`).
+- Scripts for binary analysis, checksum calculation, or flashing must be reproducible and documented.
 
 # `ROADMAP.md` handling
-- The `ROADMAP.md` is the final plan to implement the `CONCEPT.md` and `DESIGN.md` to achive the top goal
-- Define the steps in a way to allow for parallelization by defining interfaces only first and implementing functions later.
+- The `ROADMAP.md` is the final plan to implement the `CONCEPT.md` and `DESIGN.md` to achieve the top goal.
+- Define the steps in a way to allow for parallelization by defining interfaces and specification definitions first and implementing/analyzing functions later.
 - The `ROADMAP.md` file is structured into several key sections:
   - **Progress Overview**: A table summarizing Phases, Descriptions, and Status (using ✅ for completed, 🚧 for in-progress, ⏳ for planned).
   - **Goals**: A high-level list of project objectives with status emojis.
   - **Phases**: Detailed chapters for each project phase.
 - The Tasks, and Subtasks if necessary, have checkboxes to show the progress.
 - Every task to be implemented has to be modest, feasible and reasonable.
-  - If no such task is available, then break down a bigger steps to modest ones without implementing anything, just changing the `ROADMAP.md`.
+  - If no such task is available, then break down bigger steps into modest ones without implementing anything, just changing the `ROADMAP.md`.
 - Status Emojis:
   - ✅: Completed
   - 🚧: In Progress
   - ⏳: Planned / To Do
 - The progress is updated with every increment.
-- The finished tasks are linked to the corresponding issue and timestamped at the end of the line.
+- Finished tasks are linked to the corresponding issue/commit and timestamped at the end of the line.
 
 # HOWTO
-- Keep `src/install.sh` to install all tools to build the application (test only tools, see below)
-- Used “ReadTheDocs.org” (RTD) for documentation publishing from main branch
+- Used "ReadTheDocs.org" (RTD) / GitHub Pages for documentation publishing from main branch.
 
-# Testing Locally & with Github Action Workflow (GH Action WF)
-- Setup the empty CI/CD pipeline before coding anything
-- Write CI/CD test independent as `test` script of the Github action workflows
-- Create screenshots of each UI step tested and store it as asset of the Action Workflow for review
-- Use `test/install.sh` to install test tools.
-- Use the Github action workflows to run the tests after commits.
-- Before committing fetch all changes from the remote repository and merge the changes
-- Run the CI/CD on every commit on every branch
-- Add as much caching as possible to the Github action workflows
-
-
+# Testing & Verification
+- CI/CD pipelines should run automated tests on decompilation scripts, checksum recalculations, documentation syntax, and static analysis on code/schematics.
+- Run tests on every commit on every branch.
+- Add caching for build tools and dependencies where appropriate.
