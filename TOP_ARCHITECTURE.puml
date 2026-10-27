@@ -1,0 +1,62 @@
+@startuml TOP_ARCHITECTURE
+!theme plain
+skinparam componentStyle uml2
+skinparam boxPadding 10
+skinparam participantPadding 10
+
+title Mitsubishi Ecodan PUZ-WM85VAA & FTC6 Low-Noise Fan Control System Architecture
+
+package "Indoor Unit (FTC6 Controller)" {
+  [FTC6 Main Control Board] as FTC6
+  [CN105 Serial Port] as CN105
+  FTC6 -down-> CN105 : "5V TTL (2400/9600 8E1)"
+}
+
+cloud "S1-S2-S3 Interconnect Bus" {
+  [230V AC Power (S1-S2)] as S1S2
+  [12-24V Opto Serial (S2-S3)] as S2S3
+}
+
+FTC6 .down.> S2S3 : "System Telemetry / Commands"
+
+package "Outdoor Unit (PUZ-WM85VAA Inverter Chassis)" {
+  package "Main Inverter PCB" {
+    [Renesas RX62T MCU\n(R5F562T / 100-pin LQFP)] as MCU
+    [DIP Switch SW7 / SW1] as DIP
+    [Code Flash ROM\n(0xFFFC0000 - 0xFFFFFFFF)] as ROM
+    [CNF1 Upper Connector] as CNF1_PCB
+    [CNF2 Lower Connector] as CNF2_PCB
+
+    DIP -right-> MCU : "Config Bits"
+    ROM <-> MCU : "Firmware / Fan LUT (0xFFFD4120)"
+    MCU -down-> CNF1_PCB : "Vsp1 (0-6.5V) / FG1 (0-5V)"
+    MCU -down-> CNF2_PCB : "Vsp2 (0-6.5V) / FG2 (0-5V)"
+  }
+
+  package "Stage 1 Dual-Channel Interceptor Board" {
+    [ATtiny1616 MCU] as InterceptorMCU
+    [OpAmp Gain Stage (G=1.5)] as OpAmp
+    [Open-Drain FG Drivers] as FGDriver
+    [Fail-Safe NC Relay] as Relay
+
+    CNF1_PCB ==> Relay : "Intercept Channels 1 & 2"
+    CNF2_PCB ==> Relay
+    Relay -> InterceptorMCU : "Vsp_in (0.68x Div)"
+    InterceptorMCU -> OpAmp : "DAC Out"
+    OpAmp -> Relay : "Vsp_out (0-6.5V)"
+    InterceptorMCU -> FGDriver : "FG Synth (FG_in / k)"
+    FGDriver -> Relay : "FG_out"
+  }
+
+  package "BLDC Fan Assemblies" {
+    [Upper Fan Motor (CNF1)] as UpperFan
+    [Lower Fan Motor (CNF2)] as LowerFan
+
+    Relay ==> UpperFan : "340V HV, 15V Logic, Vsp_out, FG_in"
+    Relay ==> LowerFan : "340V HV, 15V Logic, Vsp_out, FG_in"
+  }
+}
+
+S2S3 .down.> MCU : "Opto Interface"
+
+@enduml

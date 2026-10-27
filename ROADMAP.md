@@ -14,29 +14,29 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ## Progress Overview
 
-| Phase | Description | Status |
-| :--- | :--- | :--- |
-| **Phase 1: Specification & System Interfaces** | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol | 🚧 |
-| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor** | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis | ⏳ |
-| **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping** | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours | ⏳ |
-| **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation** | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops | ⏳ |
-| **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ⏳ |
-| **Phase 6: Field Integration, Field Verification & Acoustic Validation** | Install interceptor/patched firmware on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal validation | ⏳ |
+| Phase                                                                                  | Description                                                                                                            | Status |
+| :------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :----- |
+| **Phase 1: Specification & System Interfaces**                                         | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol                            | ✅     |
+| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ⏳     |
+| **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ⏳     |
+| **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation**          | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops        | ⏳     |
+| **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ⏳     |
+| **Phase 6: Field Integration, Field Verification & Acoustic Validation**               | Install interceptor/patched firmware on PUZ-WM85VAA unit, perform noise level (<35 dB(A)) and thermal validation       | ⏳     |
 
 ---
 
 ## Phases & Detailed Tasks
 
-### Phase 1: Specification & System Interfaces 🚧
+### Phase 1: Specification & System Interfaces ✅
 
-- [ ] **Task 1.1: Document System Architecture and Dual Connector Specifications** ⏳
-  - [ ] Document `CNF1` (Upper Fan) and `CNF2` (Lower Fan) 6-pin connector specifications (340V DC `Vcc_HV`, 15V `Vcc_Logic`, 0–6.5V $V_{\text{sp}}$, 0–5V $FG$) in `/specification/cnf_pinout.md`
-  - [ ] Document indoor `CN105` serial interface pinouts, baud rates (2400/9600 8E1), and packet structures in `/specification/cn105_protocol.md`
-- [ ] **Task 1.2: Define MCU Hardware Architecture & Memory Maps** ⏳
-  - [ ] Specify Renesas RX62T (`R5F562TxxDFP`) registers, 12 MHz oscillator / 96 MHz ICLK, and 100-pin LQFP pinout in `/specification/rx62t_mcu.md`
-  - [ ] Define Code Flash (`0xFFFC0000`), Data Flash (`0x00100000`), SRAM (`0x00000000`), Fixed Vectors (`0xFFFFFF80`), and 128-bit ID-Code Security location (`0xFFFFFFA0`)
-- [ ] **Task 1.3: Document Factory DIP Switch & Service Parameters** ⏳
-  - [ ] Map `SW7` Silent Mode bit settings (Bit 1: -3 dB(A), Bit 2: Capacity Override) and `SW1` demand control options in `/specification/dip_switches.md`
+- [x] **Task 1.1: Document System Architecture and Dual Connector Specifications** ✅
+  - [x] Document `CNF1` (Upper Fan) and `CNF2` (Lower Fan) 6-pin connector specifications (340V DC `Vcc_HV`, 15V `Vcc_Logic`, 0–6.5V $V_{\text{sp}}$, 0–5V $FG$) in `/specification/cnf_pinout.md`
+  - [x] Document indoor `CN105` serial interface pinouts, baud rates (2400/9600 8E1), and packet structures in `/specification/cn105_protocol.md`
+- [x] **Task 1.2: Define MCU Hardware Architecture & Memory Maps** ✅
+  - [x] Specify Renesas RX62T (`R5F562TxxDFP`) registers, 12 MHz oscillator / 96 MHz ICLK, and 100-pin LQFP pinout in `/specification/rx62t_mcu.md`
+  - [x] Define Code Flash (`0xFFFC0000`), Data Flash (`0x00100000`), SRAM (`0x00000000`), Fixed Vectors (`0xFFFFFF80`), and 128-bit ID-Code Security location (`0xFFFFFFA0`)
+- [x] **Task 1.3: Document Factory DIP Switch & Service Parameters** ✅
+  - [x] Map `SW7` Silent Mode bit settings (Bit 1: -3 dB(A), Bit 2: Capacity Override) and `SW1` demand control options in `/specification/dip_switches.md`
 
 ---
 

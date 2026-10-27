@@ -1,7 +1,9 @@
 # Goal
+
 Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / electronics to lower the fan speed. If necessary provide a decompiled firmware of the PUZ-WM85VAA or FTC6. Document all explored and discarded options as well as the discovery process.
 
 # Structure
+
 - `CONCEPT.md`: The overall structure of the solution, including Use Cases (e.g. noise reduction, lower fan speed during night/low-load) and High-Level Approaches (Software parameter tuning, Firmware patching, Electronics/PWM hardware modification).
 - `DESIGN.md`: The detailed technical design of the chosen approach, including hardware schematics, firmware decompilation/memory maps, MCU architecture, signal interfaces, and toolchains.
 - `TOP_ARCHITECTURE.puml`: The top-level component overview showing all major hardware/software modules (PUZ-WM85VAA outdoor unit, FTC6 main controller, inverter driver, fan motor board) and dataflows/signals between them.
@@ -14,6 +16,7 @@ Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / ele
 - `/build/`: Temporary directory for decompilation artifacts, disassemblies, binary outputs, or compiled patches.
 
 # `CONCEPT.md` handling
+
 - The `CONCEPT.md` relates all trade-offs and functional choices back to the primary Goal.
 - It contains high-level operational concepts comparing:
   1. Software / Parameter Configuration (e.g., DIP switches, service parameters, CN105/Modbus control commands).
@@ -22,6 +25,7 @@ Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / ele
 - Every major choice is first drawn out as three alternatives, the best one is chosen and the other, discarded ones kept in summary in the last chapter of the concept.
 
 # `DESIGN.md` handling
+
 - The `DESIGN.md` derives all necessary technological choices from `CONCEPT.md`.
 - It contains precise implementation choices, micro-architectural details, and circuit diagrams.
 - Every major choice is first drawn out as three alternatives, the best one is chosen and the other, discarded ones kept in summary in the last chapter of the concept.
@@ -29,6 +33,7 @@ Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / ele
 - Includes `TOP_ARCHITECTURE.puml` as a dynamically rendered image as soon as available.
 
 ## Firmware Decompilation & Reverse Engineering
+
 - Document MCU architecture, chip markings, crystal frequencies, Flash/EEPROM memory maps, and vector tables.
 - Use reverse engineering tools (e.g. Ghidra, radare2, binwalk) to analyze firmware binaries.
 - Keep decompiled pseudocode / assembly clean and well-commented in `/src/`.
@@ -36,20 +41,24 @@ Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / ele
 - Document checksum, CRC, or signature mechanisms used by the firmware, providing script utilities to recompute valid checksums for patched binaries.
 
 ## Hardware & Electronics Design
+
 - Document connector pinouts (e.g., CN105, fan motor connections, power boards, sensor lines).
 - Provide circuit schematics (PlantUML or KiCad) for hardware interventions (e.g., signal attenuation, microcontroller-based signal interceptors).
 - Document DIP switch configurations and jumper settings affecting fan modes or operating limits.
 
 ## Communication Protocols & Interfaces
+
 - Document protocol register maps (e.g., CN105 serial protocol, M-Net, Modbus RTU/TCP).
 - Define message formats, register addresses, and parameter bounds relevant to fan speed control.
 - Ensure all serial/bus communication parameters are precisely documented for reproducible analysis.
 
 ## Command-Line Tools & Scripts
+
 - Every command-line tool or decompilation/patch script should support both short and long flag options (e.g. `-i` / `--input`, `-o` / `--output`).
 - Scripts for binary analysis, checksum calculation, or flashing must be reproducible and documented.
 
 # `ROADMAP.md` handling
+
 - The `ROADMAP.md` is the final plan to implement the `CONCEPT.md` and `DESIGN.md` to achieve the top goal.
 - Define the steps in a way to allow for parallelization by defining interfaces and specification definitions first and implementing/analyzing functions later.
 - The `ROADMAP.md` file is structured into several key sections:
@@ -67,9 +76,11 @@ Modify the Mitsubishi Electric Ecodan PUZ-WM85VAA fan parameter / software / ele
 - Finished tasks are linked to the corresponding issue/commit and timestamped at the end of the line.
 
 # HOWTO
+
 - Used "ReadTheDocs.org" (RTD) / GitHub Pages for documentation publishing from main branch.
 
 # Testing & Verification
+
 - CI/CD pipelines should run automated tests on decompilation scripts, checksum recalculations, documentation syntax, and static analysis on code/schematics.
 - Run tests on every commit on every branch.
 - Add caching for build tools and dependencies where appropriate.
