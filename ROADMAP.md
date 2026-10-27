@@ -59,9 +59,9 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ### Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping ⏳
 
-- [ ] **Task 3.1: Serial Interface Harness & Command Protocol Specification** ⏳
-  - [ ] Construct JST-PA 5-pin serial interface cable for FTC6 `CN105` port
-  - [ ] Implement Python serial interface driver `/src/tools/cn105_controller.py` supporting `-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`
+- [x] **Task 3.1: Serial Interface Harness & Command Protocol Specification** ✅
+  - [x] Construct JST-PA 5-pin serial interface cable for FTC6 `CN105` port
+  - [x] Implement Python serial interface driver `/src/tools/cn105_controller.py` supporting `-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`
 - [ ] **Task 3.2: Automated Nighttime Capacity Capping Script** ⏳
   - [ ] Develop scheduling module to send dynamic compressor capacity cap packets during designated nighttime window (22:00–07:00)
   - [ ] Validate serial telemetry readout and verify absence of FTC6 communication alarm codes
