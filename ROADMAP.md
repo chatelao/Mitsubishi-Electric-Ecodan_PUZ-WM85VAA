@@ -17,7 +17,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 | Phase                                                                                  | Description                                                                                                            | Status |
 | :------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :----- |
 | **Phase 1: Specification & System Interfaces**                                         | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol                            | ✅     |
-| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ⏳     |
+| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ✅     |
 | **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ✅     |
 | **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation**          | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops        | ⏳     |
 | **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ✅     |
@@ -40,20 +40,20 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ---
 
-### Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor ⏳
+### Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor ✅
 
-- [ ] **Task 2.1: Circuit Schematic & PCB Design** ⏳
-  - [ ] Design ATtiny1616 dual-channel schematic in PlantUML / KiCad under `/src/hardware/`
-  - [ ] Design $0.6875\times$ resistor divider ($R_1=10\text{ k}\Omega, R_2=22\text{ k}\Omega$) with 5.1V Zener clamp scaling $6.5\text{V}$ $V_{\text{sp}}$ to $4.47\text{V}$ for 5V ADC
-  - [ ] Design dual MCP6002 OpAmp gain stage ($G=1.50$) powered from 15V `Vcc_Logic` rail restoring $0\text{–}6.5\text{V}$ DAC dynamic range
-  - [ ] Design open-drain MOSFET driver for $FG$ pulse output synthesis and NC DPDT fail-safe relay circuit
-- [ ] **Task 2.2: Interceptor Firmware Implementation** ⏳
-  - [ ] Implement ATtiny1616 embedded code under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.68 - 1.0$)
-  - [ ] Implement closed-loop tachometer pulse measurement (`FG_in`) and pulse ratio synthesis (`FG_out = FG_in / k`)
-  - [ ] Implement active stall passthrough (`FG_out = LOW` if $f_{\text{actual}} < 10\text{ Hz}$ while $V_{\text{sp}} > 1.8\text{V}$)
-  - [ ] Implement Watchdog Timer (WDT) and NTC thermistor freeze override ($T_{\text{evap}} < -3^\circ\text{C}$) driving NC relay bypass
-- [ ] **Task 2.3: Interceptor Bench Verification** ⏳
-  - [ ] Simulate and test interceptor board on signal test bench under `/test/test_interceptor.py` with CLI flags `-i/--input`, `-o/--output`, `-v/--verbose`
+- [x] **Task 2.1: Circuit Schematic & PCB Design** ✅
+  - [x] Design ATtiny1616 dual-channel schematic in PlantUML / KiCad under `/src/hardware/`
+  - [x] Design $0.6875\times$ resistor divider ($R_1=10\text{ k}\Omega, R_2=22\text{ k}\Omega$) with 5.1V Zener clamp scaling $6.5\text{V}$ $V_{\text{sp}}$ to $4.47\text{V}$ for 5V ADC
+  - [x] Design dual MCP6002 OpAmp gain stage ($G=1.50$) powered from 15V `Vcc_Logic` rail restoring $0\text{–}6.5\text{V}$ DAC dynamic range
+  - [x] Design open-drain MOSFET driver for $FG$ pulse output synthesis and NC DPDT fail-safe relay circuit
+- [x] **Task 2.2: Interceptor Firmware Implementation** ✅
+  - [x] Implement ATtiny1616 embedded code under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.68 - 1.0$)
+  - [x] Implement closed-loop tachometer pulse measurement (`FG_in`) and pulse ratio synthesis (`FG_out = FG_in / k`)
+  - [x] Implement active stall passthrough (`FG_out = LOW` if $f_{\text{actual}} < 10\text{ Hz}$ while $V_{\text{sp}} > 1.8\text{V}$)
+  - [x] Implement Watchdog Timer (WDT) and NTC thermistor freeze override ($T_{\text{evap}} < -3^\circ\text{C}$) driving NC relay bypass
+- [x] **Task 2.3: Interceptor Bench Verification** ✅
+  - [x] Simulate and test interceptor board on signal test bench under `/test/test_interceptor.py` with CLI flags `-i/--input`, `-o/--output`, `-v/--verbose`
 
 ---
 
