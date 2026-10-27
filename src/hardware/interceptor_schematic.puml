@@ -1,0 +1,69 @@
+@startuml ATtiny1616_Dual_Channel_Interceptor_Schematic
+!theme plain
+skinparam componentStyle uml2
+skinparam boxPadding 10
+
+title ATtiny1616 Dual-Channel Hardware Interceptor Circuit Schematic
+
+package "PUZ-WM85VAA Main Inverter Board Interface" {
+  component [CNF1 Inverter Header\n(Upper Fan Output)] as CNF1_IN
+  component [CNF2 Inverter Header\n(Lower Fan Output)] as CNF2_IN
+}
+
+package "Dual-Channel Interceptor Board" {
+
+  package "Power Supply & Voltage Regulation" {
+    component [15V Vcc_Logic Input] as Vcc15
+    component [LDO Regulator 15V->5V\n(78L05 / L78L05)] as LDO
+    component [Decoupling Capacitors\n100nF / 10uF] as Decoup
+    Vcc15 -> LDO : "15V Input"
+    LDO -> Decoup : "5.0V VDD Line"
+  }
+
+  package "Channel 1 & 2 Analog Front-End (Vsp Attenuation)" {
+    component [Resistor Divider (0.6875x)\nR1=10k, R2=22k\n5.1V Zener Clamp] as Div12
+    component [Dual MCP6002 OpAmp Stage\n(Non-inverting Gain G=1.50)\nPowered from 15V Rail] as OpAmp12
+  }
+
+  package "Channel 1 & 2 Digital Front-End (FG Tachometer)" {
+    component [Schmitt Trigger Buffer\n74LVC1G17] as Schmitt
+    component [Dual Open-Drain MOSFET Drivers\n(2N7002 / BSS138)] as ODFET
+  }
+
+  package "Microcontroller Core" {
+    component [ATtiny1616 Microcontroller\n- VDD: 5.0V\n- ADC0 / ADC1 (Vsp In)\n- DAC0 / DAC1 (Vsp Out)\n- TCB0 / TCB1 (FG Measure)\n- TCA0 PWM (FG Synth)\n- NTC Thermistor Input\n- WDT / Safety Logic] as MCU
+  }
+
+  package "Protection & Fail-Safe Bypass" {
+    component [NTC Evaporator Sensor\n(-3°C Freeze Threshold)] as NTC
+    component [Dual NC DPDT Fail-Safe Relays\n(Unpowered / WDT Trip Bypass)] as Relay
+  }
+
+  CNF1_IN --> Relay : "Vsp_in1 (0-6.5V), FG_out1"
+  CNF2_IN --> Relay : "Vsp_in2 (0-6.5V), FG_out2"
+
+  Relay --> Div12 : "Vsp_in (Normal Op)"
+  Div12 --> MCU : "Scaled ADC In (0-4.47V)"
+
+  MCU --> OpAmp12 : "DAC Out (0-4.33V)"
+  OpAmp12 --> Relay : "Vsp_out (0-6.5V Amplified)"
+
+  Relay --> Schmitt : "FG_in (0-5V Tach Pulse)"
+  Schmitt --> MCU : "TCB Capture Pulse"
+
+  MCU --> ODFET : "TCA Pulse Synth (FG_in / k)"
+  ODFET --> Relay : "FG_out (Open Drain)"
+
+  NTC --> MCU : "T_evap ADC Pin"
+  MCU --> Relay : "Relay Coil Control Signal"
+}
+
+package "Fan Motor Harnesses" {
+  component [Upper BLDC Fan Motor\n(CNF1 Harness)] as Fan1
+  component [Lower BLDC Fan Motor\n(CNF2 Harness)] as Fan2
+}
+
+Relay --> Fan1 : "340V HV, 15V Logic, Vsp_out1, FG_in1"
+Relay --> Fan2 : "340V HV, 15V Logic, Vsp_out2, FG_in2"
+
+@enduml
