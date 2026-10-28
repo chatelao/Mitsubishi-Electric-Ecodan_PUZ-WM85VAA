@@ -63,9 +63,9 @@ Byte 08: [CS]  (Checksum Byte)
 
 The FTC6 responds to poll commands (`Command 0x03`) by broadcasting system state telemetries:
 
-- **Compressor Operating Frequency ($f_{\text{comp}}$)**: Register `0x10` (Hz)
-- **Evaporator Temperature ($T_{\text{evap}}$)**: Register `0x12` ($\text{Temp in } ^\circ\text{C} + 40$)
-- **Suction Superheat ($\Delta T_{\text{SH}}$)**: Register `0x15` (Kelvin x 10)
+- **Compressor Operating Frequency ($f\_{\text{comp}}$)**: Register `0x10` (Hz)
+- **Evaporator Temperature ($T\_{\text{evap}}$)**: Register `0x12` ($\text{Temp in } ^\circ\text{C} + 40$)
+- **Suction Superheat ($\Delta T\_{\text{SH}}$)**: Register `0x15` (Kelvin x 10)
 - **Outdoor Fan Speed Status**: Register `0x1A` (Step 0..8)
 
 ---

@@ -98,7 +98,7 @@ In accordance with project design standards, every major engineering decision do
   - _Reason for Choice_: Provides immediate acoustic reduction while guaranteeing zero risk of bricking the MCU flash or triggering ID-code lockout.
 - **Discarded Alternative 1: Direct Blind JTAG/SCI Flash Patching without Readout Verification (Option B)**
   - _Reason for Discard_: If the Renesas 128-bit ID-Code protection at `0xFFFFFFA0` is active, blind SCI/JTAG connection attempts trigger automatic MCU flash block erasure or permanent readout lockout.
-- **Discarded Alternative 2: Passive Resistor Divider on $V_{\text{sp}}$ Signal Line (Option C)**
+- **Discarded Alternative 2: Passive Resistor Divider on $V\_{\text{sp}}$ Signal Line (Option C)**
   - _Reason for Discard_: Passive voltage division on $V_{\text{sp}}$ alters motor RPM without adjusting feedback, causing an immediate mismatch with actual tachometer $FG$ pulses and triggering diagnostic fault codes `P8`/`P9`.
 
 ### Decision Domain 2: Firmware Analysis & Modulation Toolchain
