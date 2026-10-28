@@ -77,7 +77,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 - [ ] **Task 4.2: Extract and Decompile Outdoor Unit Firmware** ⏳
   - [ ] Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) to outdoor unit programming header
   - [ ] Read Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary dump file `/build/puz_wm85vaa_factory.bin`
-  - [ ] Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash
+  - [x] Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash ✅
   - [ ] Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script
 - [ ] **Task 4.3: Map Fan Target RPM Tables & Closed-Loop Safety Guards** ⏳
   - [ ] Map target RPM lookup table array at `0xFFFD4120` in Ghidra and verify 16-entry `uint16_t` matrix structure
