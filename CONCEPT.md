@@ -39,7 +39,7 @@ To achieve the lower fan speed goal, three high-level operational approaches hav
 |             Configuration & Cap   | service parameters, or CN105 serial capping.  |
 +-----------------------------------+-----------------------------------------------+
 | Approach 2: Dual-Channel Hardware | Intercept and attenuate Vsp signals on CNF1 & |
-|             Signal Interceptor    | CNF2 while synthesizing FG pulses (ATtiny).   |
+|             Signal Interceptor    | CNF2 while synthesizing FG pulses (RP2350).   |
 +-----------------------------------+-----------------------------------------------+
 | Approach 3: Firmware Reverse Eng. | Read Renesas RX62T MCU flash, patch fan LUTs, |
 |             & Logic Modification  | recalculate CRC-16, and reflash ROM.          |
@@ -54,7 +54,7 @@ To achieve the lower fan speed goal, three high-level operational approaches hav
 
 ### Approach 2: Dual-Channel Hardware Signal Interceptor (Stage 1 Primary)
 
-- **Mechanism**: Place an inline microcontroller board (ATtiny1616-based) between the main inverter control PCB and both DC brushless fan motor connectors (`CNF1` Upper and `CNF2` Lower). The module attenuates analog speed command voltages ($V_{\text{sp}}$, 0–6.5V) while capturing actual motor tachometer pulses ($FG$) and synthesizing proportional $FG$ feedback pulses ($f_{\text{synth}} = f_{\text{actual}} / k$) to the main board MCU to prevent `P8`/`P9` feedback mismatch fault codes. An electro-thermal fail-safe relay bypasses intervention if $T_{\text{evap}} < -3^\circ\text{C}$ or $V_{\text{sp}} > 5.2\text{V}$.
+- **Mechanism**: Place an inline microcontroller board (RP2350-based) between the main inverter control PCB and both DC brushless fan motor connectors (`CNF1` Upper and `CNF2` Lower). The module attenuates analog speed command voltages ($V_{\text{sp}}$, 0–6.5V) while capturing actual motor tachometer pulses ($FG$) and synthesizing proportional $FG$ feedback pulses ($f_{\text{synth}} = f_{\text{actual}} / k$) to the main board MCU to prevent `P8`/`P9` feedback mismatch fault codes. An electro-thermal fail-safe relay bypasses intervention if $T_{\text{evap}} < -3^\circ\text{C}$ or $V_{\text{sp}} > 5.2\text{V}$.
 - **Pros**: Direct control over fan motor speed independent of MCU flash protection or locking mechanisms; fully reversible; eliminates MCU bricking risks.
 - **Cons**: Requires custom PCB hardware development and dual-channel signal conditioning; requires careful $FG$ pulse synthesis to avoid diagnostic trips.
 
@@ -112,10 +112,10 @@ In accordance with project design standards, every major engineering decision do
 
 ### Decision Domain 3: Interceptor Signal Conditioning Front-End
 
-- **Chosen Option: 0.68x Input Divider + ATtiny1616 DAC + 15V Rail OpAmp ($G=1.5$) + NC Relay Bypass (Option A)**
-  - _Reason for Choice_: Safely attenuates $6.5\text{V}$ $V_{\text{sp}}$ down to $4.47\text{V}$ for the 5V ATtiny1616 ADC, while the 15V-powered rail-to-rail OpAmp restores full $0\text{–}6.5\text{V}$ dynamic range for 100% emergency fan override.
-- **Discarded Alternative 1: Direct 6.5V Signal Connection to 5V MCU Pins (Option B)**
-  - _Reason for Discard_: Exceeds ATtiny1616 absolute maximum pin ratings ($V_{\text{DD}} + 0.5\text{V} = 5.5\text{V}$), forward-biasing internal ESD diodes and causing MCU latch-up or silicon destruction.
+- **Chosen Option: 0.50x Input Divider + RP2350 PWM/DAC + 15V Rail OpAmp ($G=2.0$) + NC Relay Bypass (Option A)**
+  - _Reason for Choice_: Safely attenuates $6.5\text{V}$ $V_{\text{sp}}$ down to $3.25\text{V}$ for the 3.3V RP2350 ADC, while the 15V-powered rail-to-rail OpAmp restores full $0\text{–}6.5\text{V}$ dynamic range for 100% emergency fan override.
+- **Discarded Alternative 1: Direct 6.5V Signal Connection to 3.3V MCU Pins (Option B)**
+  - _Reason for Discard_: Exceeds RP2350 absolute maximum pin ratings ($V_{\text{DDIO}} + 0.3\text{V} = 3.6\text{V}$), forward-biasing internal ESD diodes and causing MCU latch-up or silicon destruction.
 - **Discarded Alternative 2: 340V DC High-Voltage Bus PWM Chopping (Option C)**
   - _Reason for Discard_: Chopping the high-voltage DC bus generates severe electromagnetic interference (EMI) and damages internal BLDC motor driver ICs.
 

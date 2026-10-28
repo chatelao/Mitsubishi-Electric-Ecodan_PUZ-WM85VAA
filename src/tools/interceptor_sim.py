@@ -2,7 +2,7 @@
 """
 interceptor_sim.py - Interceptor Board Bench Simulation Tool
 
-Simulates ATtiny1616 dual-channel hardware interceptor signal transformation:
+Simulates RP2350 dual-channel hardware interceptor signal transformation:
   - Vsp dynamic attenuation (Vsp_out = Vsp_in * k)
   - Open-drain FG tachometer pulse ratio synthesis (FG_out = FG_in / k)
   - Active stall passthrough (FG_out = 0 Hz if FG_in < 10 Hz while Vsp_in > 1.8V)
@@ -21,8 +21,8 @@ import json
 import sys
 import os
 
-DIVIDER_RATIO = 0.6875
-OPAMP_GAIN = 1.50
+DIVIDER_RATIO = 0.50
+OPAMP_GAIN = 2.00
 DEFAULT_K_ATTEN = 0.68
 MIN_K_ATTEN = 0.68
 MAX_K_ATTEN = 1.00
@@ -35,7 +35,7 @@ NTC_FREEZE_TEMP_C_MIN = -3.0
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
-        description="ATtiny1616 Dual-Channel Interceptor Signal Bench Simulator."
+        description="RP2350 Dual-Channel Interceptor Signal Bench Simulator."
     )
     parser.add_argument(
         "-i",

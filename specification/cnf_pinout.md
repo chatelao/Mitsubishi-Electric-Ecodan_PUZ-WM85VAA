@@ -50,9 +50,9 @@ Both connectors route high-voltage DC power alongside low-voltage DC logic and a
 When inserting the Stage 1 Dual-Channel Interceptor module between `CNF1`/`CNF2` on the main PCB and the fan motor harness:
 
 1. **`Vcc_HV` (Pin 1)**: Must pass through directly with high-voltage isolation ($>600\text{V}$ clearance rating).
-2. **`Vcc_Logic` (Pin 4)**: Powers the interceptor module's local 5V LDO voltage regulator.
-3. **`Vsp` (Pin 5)**: Intercepted via $0.6875\times$ resistor divider ($10\text{ k}\Omega / 22\text{ k}\Omega$) with $5.1\text{V}$ Zener clamp into the ATtiny1616 ADC, and re-generated via DAC + OpAmp ($G=1.5$) powered from Pin 4 ($15\text{V}$).
-4. **`FG` (Pin 6)**: Intercepted from motor tachometer output, conditioned via Schmitt trigger into ATtiny1616 timer capture, and synthesized back to main PCB via open-drain MOSFET ($f_{\text{synth}} = f_{\text{actual}} / k$).
+2. **`Vcc_Logic` (Pin 4)**: Powers the interceptor module's local 3.3V LDO voltage regulator.
+3. **`Vsp` (Pin 5)**: Intercepted via $0.50\times$ resistor divider ($10\text{ k}\Omega / 10\text{ k}\Omega$) with $3.3\text{V}$ Zener clamp into the RP2350 ADC, and re-generated via PWM/DAC + OpAmp ($G=2.0$) powered from Pin 4 ($15\text{V}$).
+4. **`FG` (Pin 6)**: Intercepted from motor tachometer output, conditioned via Schmitt trigger into RP2350 PIO / timer capture, and synthesized back to main PCB via open-drain MOSFET ($f_{\text{synth}} = f_{\text{actual}} / k$).
 
 ---
 
@@ -62,7 +62,7 @@ When inserting the Stage 1 Dual-Channel Interceptor module between `CNF1`/`CNF2`
    - https://les.mitsubishielectric.co.uk/
 2. **Nidec / Shibaura DC BLDC Motor Interface & Pinout Specifications**:
    - https://www.nidec.com/en/
-3. **Microchip ATtiny1616 Datasheet & Technical Specifications**:
-   - https://www.microchip.com/en-us/product/attiny1616
+3. **Raspberry Pi RP2350 Datasheet & Technical Specifications**:
+   - https://www.raspberrypi.com/documentation/microcontrollers/rp2350.html
 4. **Texas Instruments Application Report: Driving BLDC Motors & Hall Sensor Speed Feedback**:
    - https://www.ti.com/motor-drivers/overview.html
