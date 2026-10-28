@@ -40,8 +40,17 @@ To format and check documentation in accordance with repository standards:
 
 ```bash
 # Check Markdown formatting
-npx prettier --check "*.md" "specification/*.md"
+npx prettier --check "**/*.md"
 
 # Automatically format Markdown files
-npx prettier --write "*.md" "specification/*.md"
+npx prettier --write "**/*.md"
 ```
+
+### Continuous Integration (CI/CD)
+
+An automated GitHub Actions pipeline (`.github/workflows/ci.yml`) validates the state of the repository after every commit and pull request:
+
+- **Documentation Syntax & Formatting**: Enforces Markdown formatting with Prettier.
+- **Source Code Syntax & Compilation**: Validates Python scripts (`py_compile`) and C embedded firmware compilation (`gcc`).
+- **Automated Test Suite**: Executes unit and integration test benches (`PYTHONPATH=. pytest`).
+- **Toolchain End-to-End Pipeline**: Runs end-to-end simulation, factory ROM synthesis, fan table patching, CRC recalculation, CN105 packet generation, and nighttime capper scheduling.

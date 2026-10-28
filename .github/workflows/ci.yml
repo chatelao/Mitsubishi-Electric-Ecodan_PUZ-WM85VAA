@@ -1,0 +1,66 @@
+name: CI/CD Pipeline Validation
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  validate:
+    name: Validate Pipeline and Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Validate Markdown syntax & formatting
+        run: npx prettier --check "**/*.md"
+
+      - name: Validate Python script syntax
+        run: python3 -m py_compile src/tools/*.py test/*.py
+
+      - name: Validate C firmware compilation
+        run: gcc -Wall -Wextra -Werror -c src/interceptor/interceptor_firmware.c -o /dev/null
+
+      - name: Run Pytest test suite
+        run: PYTHONPATH=. pytest -v
+
+      - name: Validate toolchain end-to-end execution
+        run: |
+          mkdir -p build
+          # 1. Generate synthetic factory ROM
+          PYTHONPATH=. python3 src/tools/generate_factory_rom.py -o build/puz_wm85vaa_factory.bin --force -v
+          # 2. Check RPM LUT in factory ROM
+          PYTHONPATH=. python3 src/tools/patch_fan_rpm.py -i build/puz_wm85vaa_factory.bin -c -v
+          # 3. Patch fan RPM ceiling
+          PYTHONPATH=. python3 src/tools/patch_fan_rpm.py -i build/puz_wm85vaa_factory.bin -o build/puz_wm85vaa_patched.bin --max-rpm 780 -v
+          # 4. Patch CRC-16 checksum
+          PYTHONPATH=. python3 src/tools/patch_checksum.py -i build/puz_wm85vaa_patched.bin -o build/puz_wm85vaa_patched_crc.bin -v
+          # 5. Verify patched checksum
+          PYTHONPATH=. python3 src/tools/patch_checksum.py -i build/puz_wm85vaa_patched_crc.bin -c -v
+          # 6. Execute signal bench interceptor simulation check
+          PYTHONPATH=. python3 src/tools/interceptor_sim.py -c -v
+          # 7. Generate CN105 demand cap frame
+          PYTHONPATH=. python3 src/tools/cn105_controller.py --demand-cap 75 -o build/cn105_test.bin -v
+          # 8. Validate CN105 frame structure
+          PYTHONPATH=. python3 src/tools/cn105_controller.py -i build/cn105_test.bin -c -v
+          # 9. Test nighttime capper schedule
+          PYTHONPATH=. python3 src/tools/nighttime_capper.py --time "23:00" --demand-cap 75 -o build/nighttime_test.bin -v

@@ -1,3 +1,5 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+build/*
+!build/puz_wm85vaa_factory.bin
