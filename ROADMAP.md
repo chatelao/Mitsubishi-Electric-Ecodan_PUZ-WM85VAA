@@ -77,7 +77,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
   - [ ] **Task 4.2.1: Flash Readout Execution**: Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) and dump Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary file `/build/puz_wm85vaa_factory.bin`
   - [x] **Task 4.2.2: Linker Script Specification**: Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash ✅
   - [x] **Task 4.2.3: Synthetic Factory Binary Generator**: Develop `/src/tools/generate_factory_rom.py` supporting CLI flags (`-o/--output`, `-c/--check-only`, `-v/--verbose`) to produce factory ROM binary for emulation testing ✅
-  - [ ] **Task 4.2.4: Decompiler Environment Initialization**: Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script
+  - [x] **Task 4.2.4: Decompiler Environment Initialization**: Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script `/src/firmware/ghidra_init_rx62t.py` ✅
 - [ ] **Task 4.3: Map Fan Target RPM Tables & Closed-Loop Safety Guards** ⏳
   - [ ] **Task 4.3.1: Fan Target RPM Table Identification**: Map target RPM lookup table array at `0xFFFD4120` in Ghidra and verify 16-entry `uint16_t` matrix structure
   - [ ] **Task 4.3.2: Suction Superheat Safeguard Disassembly**: Disassemble suction superheat collapse protection subroutine ($\Delta T_{\text{SH}} < 3.5\text{ K} \implies$ ramp RPM to 1150)
