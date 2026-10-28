@@ -1,6 +1,6 @@
 /**
  * @file interceptor_firmware.c
- * @brief ATtiny1616 Dual-Channel Interceptor Board Embedded Firmware Implementation
+ * @brief RP2350 Dual-Channel Interceptor Board Embedded Firmware Implementation
  */
 
 #include "interceptor_firmware.h"

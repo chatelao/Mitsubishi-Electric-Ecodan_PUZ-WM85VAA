@@ -160,14 +160,14 @@ Main PCB (CNF1 & CNF2 Dual Channel)                             Fan Motor Harnes
 | Pin 4: 15V DC Logic    +-----------------+------------------>+ Pin 4: 15V DC Logic    |
 |                        |                 |                   |                        |
 |                        |        +--------+--------+          |                        |
-|                        |        | LDO (15V -> 5V) |          |                        |
+|                        |        | LDO (15V->3.3V) |          |                        |
 |                        |        +--------+--------+          |                        |
-|                        |                 | Vdd (5.0V)        |                        |
+|                        |                 | Vdd (3.3V)        |                        |
 |                        |                 v                   |                        |
-| Pin 5: Vsp_in (0-6.5V) +--[Div 0.68x]--->+ ADC0    DAC0 +--->+ OpAmp (G=1.5, 15V Rail)|
+| Pin 5: Vsp_in (0-6.5V) +--[Div 0.50x]--->+ ADC0 PWM/PIO +--->+ OpAmp (G=2.0, 15V Rail)|
 |                        |                 |              |    | +---[NC Relay Bypass]->+ Pin 5: Vsp_out
-|                        |                 |  ATtiny1616  |    |                        |
-| Pin 6: FG_out (0-5V)   +<-[Open-Drain]---+ TCB0    TCA0 +<---+-[Schmitt Trigger]------+ Pin 6: FG_in
+|                        |                 |    RP2350    |    |                        |
+| Pin 6: FG_out (0-5V)   +<-[Open-Drain]---+ PIO    Timer +<---+-[Schmitt Trigger]------+ Pin 6: FG_in
 +------------------------+                 +-------+------+    +------------------------+
                                                    |
                                       [NTC_Evap / WDT / Vsp > 5.2V]
@@ -178,15 +178,15 @@ Main PCB (CNF1 & CNF2 Dual Channel)                             Fan Motor Harnes
 ### 5.1 Hardware Signal Conditioning & Protection Specifications
 
 1. **Input Overvoltage Attenuation (`Vsp_in` -> ADC)**:
-   Since `Vsp_in` reaches 6.5V and the ATtiny1616 operating at $V_{\text{DD}} = 5.0 \text{ V}$ has an absolute maximum pin rating of $V_{\text{DD}} + 0.5 \text{ V}$ (5.5V), a precision resistor divider ($R_1 = 10 \text{ k}\Omega$, $R_2 = 22 \text{ k}\Omega$, scaling factor 0.6875) with a 5.1V Zener clamp scales 6.5V down to 4.47V prior to the ADC input.
-2. **15V OpAmp Output Restoration (DAC -> `Vsp_out`)**:
-   The ATtiny1616 internal DAC (`DAC0`, max reference 4.34V) cannot directly drive a 6.5V output required for 100% emergency fan speed. The DAC output is buffered through a dual rail-to-rail operational amplifier (e.g., MCP6002 / TLV9062) powered directly from the 15V `Vcc_Logic` rail (Pin 4) with a non-inverting gain $G = 1 + \frac{R_f}{R_g} = 1.50$, restoring the full 0–6.5V dynamic range.
+   Since `Vsp_in` reaches 6.5V and the RP2350 operating at $V_{\text{DDIO}} = 3.3 \text{ V}$ has an absolute maximum pin rating of $V_{\text{DDIO}} + 0.3 \text{ V}$ (3.6V), a precision resistor divider ($R_1 = 10 \text{ k}\Omega$, $R_2 = 10 \text{ k}\Omega$, scaling factor 0.500) with a 3.3V Zener clamp scales 6.5V down to 3.25V prior to the 3.3V ADC input.
+2. **15V OpAmp Output Restoration (PWM/DAC -> `Vsp_out`)**:
+   The RP2350 PWM/DAC output (max 3.25V / 3.3V reference) cannot directly drive a 6.5V output required for 100% emergency fan speed. The output is buffered through a dual rail-to-rail operational amplifier (e.g., MCP6002 / TLV9062) powered directly from the 15V `Vcc_Logic` rail (Pin 4) with a non-inverting gain $G = 1 + \frac{R_f}{R_g} = 2.00$, restoring the full 0–6.5V dynamic range.
 3. **Closed-Loop FG Pulse Synthesis & Stall Propagation**:
-   To prevent `P8`/`P9` feedback mismatch faults during active attenuation ($V_{\text{sp,out}} = k \cdot V_{\text{sp,in}}$, with $k \in [0.68, 1.0]$), the MCU captures the real motor tachometer frequency $f_{\text{FG,in}}$ and synthesizes $f_{\text{FG,out}} = f_{\text{FG,in}} / k$ via an open-drain MOSFET output.
+   To prevent `P8`/`P9` feedback mismatch faults during active attenuation ($V_{\text{sp,out}} = k \cdot V_{\text{sp,in}}$, with $k \in [0.68, 1.0]$), the MCU captures the real motor tachometer frequency $f_{\text{FG,in}}$ (via PIO / hardware timer input capture) and synthesizes $f_{\text{FG,out}} = f_{\text{FG,in}} / k$ via an open-drain MOSFET output.
    - **Critical Anti-Spoofing Rule**: If the physical fan motor stalls or fails ($f_{\text{FG,in}} < 10 \text{ Hz}$ while $V_{\text{sp,out}} > 1.8 \text{ V}$), the interceptor **immediately halts pulse synthesis** (`FG_out = LOW`), forcing the main board to register a legitimate `P8`/`P9` error and cut power before hardware damage occurs.
 4. **Hardware Normally-Closed (NC) Fail-Safe Bypass**:
    A dual DPDT signal relay (or analog switch with NC contacts in the unpowered state) connects `Vsp_in` directly to `Vsp_out` and `FG_in` directly to `FG_out` whenever:
-   - The interceptor loses 5V power or the ATtiny1616 Watchdog Timer (WDT) trips.
+   - The interceptor loses 3.3V power or the RP2350 Watchdog Timer (WDT) trips.
    - `Vsp_in` exceeds 5.2V (indicating the main board requests high-load thermal dissipation).
    - The interceptor's clip-on evaporator NTC thermistor detects $T_{\text{evap}} < -3.0^\circ\text{C}$ (icing hazard).
 
@@ -198,5 +198,5 @@ Main PCB (CNF1 & CNF2 Dual Channel)                             Fan Motor Harnes
 | :---------------------------------- | :------------------------------------------------------------------------------- | :---------------------------------------------------------------- | :-------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **1. Primary Execution Strategy**   | **Dual-Channel Closed-Loop Hardware Interceptor + Indoor `CN105` Load Cap**      | Direct Blind JTAG/SCI Flash Patching without Readout Verification | Passive Resistor Divider on `Vsp` Signal Line | Option A eliminates the risk of bricking the outdoor PCB via Renesas ID-Code protection while preserving full closed-loop safety; Option B risks flash erasure; Option C triggers immediate `P8`/`P9` faults. |
 | **2. Firmware Analysis Toolchain**  | **Ghidra v11.x with Renesas RX Processor Module & Python Automation**            | IDA Pro with Proprietary RX Plugin                                | Radare2 CLI Disassembler                      | Ghidra provides deterministic C decompilation of RX memory-mapped peripherals and open-source script reproducibility in `/src/tools/`.                                                                        |
-| **3. Interceptor Analog Front-End** | **0.68x Input Divider + ATtiny1616 DAC + 15V Rail OpAmp ($G = 1.5$) + NC Relay** | Direct 6.5V Connection to 5V MCU Pins                             | 340V DC High-Voltage Bus PWM Chopping         | Direct 6.5V injection destroys the 5V MCU via ESD diode forward-biasing; 340V DC chopping causes lethal EMI and blows the internal BLDC inverter stage.                                                       |
+| **3. Interceptor Analog Front-End** | **0.50x Input Divider + RP2350 PWM/DAC + 15V Rail OpAmp ($G = 2.0$) + NC Relay** | Direct 6.5V Connection to 3.3V MCU Pins                           | 340V DC High-Voltage Bus PWM Chopping         | Direct 6.5V injection destroys the 3.3V MCU via ESD diode forward-biasing; 340V DC chopping causes lethal EMI and blows the internal BLDC inverter stage.                                                     |
 | **4. Fault & Safety Handling**      | **Active Stall Passthrough + Evaporator NTC Override + WDT Relay Bypass**        | Continuous Blind FG Frequency Generation (Fixed Lookup)           | Permanent JTAG RAM Variable Overwriting       | Blind FG synthesis masks physical fan blockages and causes IPM thermal runaway; permanent JTAG probes suffer from EMI disconnects in outdoor heat pump chassis.                                               |

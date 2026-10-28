@@ -7,7 +7,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 ## Goals
 
 - 🚧 **Primary Goal**: Reduce operational fan noise of the Mitsubishi Electric Ecodan PUZ-WM85VAA heat pump outdoor unit by lowering target fan RPM during high-demand and nighttime operation (<35 dB(A) sound pressure at 3 meters) while preserving critical safety logic (suction superheat collapse prevention, defrost airflow minimums, and IPM thermal protection).
-- ⏳ **Stage 1 (Primary): Hardware Interceptor & CN105 Capping**: Develop and deploy a dual-channel inline microcontroller signal interceptor board (ATtiny1616-based $V_{\text{sp}}$ attenuation & synthetic $FG$ pulse generation) on connectors `CNF1`/`CNF2` combined with indoor `CN105` serial thermal load capping.
+- ⏳ **Stage 1 (Primary): Hardware Interceptor & CN105 Capping**: Develop and deploy a dual-channel inline microcontroller signal interceptor board (RP2350-based $V_{\text{sp}}$ attenuation & synthetic $FG$ pulse generation) on connectors `CNF1`/`CNF2` combined with indoor `CN105` serial thermal load capping.
 - ⏳ **Stage 2 (Advanced): Firmware Reverse Engineering & Patching**: Inspect Renesas RX62T 128-bit ID-code protection (`0xFFFFFFA0`), extract code flash (`0xFFFC0000`–`0xFFFFFFFF`), decompile in Ghidra v11.x, patch fan target lookup tables (`0xFFFD4120`), recalculate CRC-16-CCITT checksums via script, and reflash the MCU.
 
 ---
@@ -17,7 +17,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 | Phase                                                                                  | Description                                                                                                            | Status |
 | :------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- | :----- |
 | **Phase 1: Specification & System Interfaces**                                         | Document pinouts, Renesas RX62T specs, memory maps, DIP switches, and CN105 serial protocol                            | ✅     |
-| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design ATtiny1616 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis        | ✅     |
+| **Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor**                     | Design RP2350 dual-channel circuit, schematic, signal conditioning front-end, and open-drain $FG$ synthesis            | ✅     |
 | **Phase 3: Stage 1 Subsystem — FTC6 Indoor CN105 Thermal Load Capping**                | Implement 2400/9600 bps 8E1 serial command injection to cap compressor thermal load during nighttime hours             | ✅     |
 | **Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation**          | Extract Renesas RX62T code flash, decompile RX core logic, map fan target LUT at `0xFFFD4120`, and safety loops        | ⏳     |
 | **Phase 5: Stage 2 Subsystem — Firmware Patching, Checksum Recalculation & Emulation** | Patch fan target LUTs (1150 to 780 RPM cap), recalculate CRC-16 checksum via `/src/tools/patch_checksum.py`, run tests | ✅     |
@@ -43,12 +43,12 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 ### Phase 2: Stage 1 Subsystem — Dual-Channel Hardware Interceptor ✅
 
 - [x] **Task 2.1: Circuit Schematic & PCB Design** ✅
-  - [x] Design ATtiny1616 dual-channel schematic in PlantUML / KiCad under `/src/hardware/`
-  - [x] Design $0.6875\times$ resistor divider ($R_1=10\text{ k}\Omega, R_2=22\text{ k}\Omega$) with 5.1V Zener clamp scaling $6.5\text{V}$ $V_{\text{sp}}$ to $4.47\text{V}$ for 5V ADC
-  - [x] Design dual MCP6002 OpAmp gain stage ($G=1.50$) powered from 15V `Vcc_Logic` rail restoring $0\text{–}6.5\text{V}$ DAC dynamic range
+  - [x] Design RP2350 dual-channel schematic in PlantUML / KiCad under `/src/hardware/`
+  - [x] Design $0.50\times$ resistor divider ($R_1=10\text{ k}\Omega, R_2=10\text{ k}\Omega$) with 3.3V Zener clamp scaling $6.5\text{V}$ $V_{\text{sp}}$ to $3.25\text{V}$ for 3.3V ADC
+  - [x] Design dual MCP6002 OpAmp gain stage ($G=2.00$) powered from 15V `Vcc_Logic` rail restoring $0\text{–}6.5\text{V}$ PWM/DAC dynamic range
   - [x] Design open-drain MOSFET driver for $FG$ pulse output synthesis and NC DPDT fail-safe relay circuit
 - [x] **Task 2.2: Interceptor Firmware Implementation** ✅
-  - [x] Implement ATtiny1616 embedded code under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.68 - 1.0$)
+  - [x] Implement RP2350 embedded code under `/src/interceptor/` for dynamic $V_{\text{sp}}$ attenuation ($k = 0.68 - 1.0$)
   - [x] Implement closed-loop tachometer pulse measurement (`FG_in`) and pulse ratio synthesis (`FG_out = FG_in / k`)
   - [x] Implement active stall passthrough (`FG_out = LOW` if $f_{\text{actual}} < 10\text{ Hz}$ while $V_{\text{sp}} > 1.8\text{V}$)
   - [x] Implement Watchdog Timer (WDT) and NTC thermistor freeze override ($T_{\text{evap}} < -3^\circ\text{C}$) driving NC relay bypass

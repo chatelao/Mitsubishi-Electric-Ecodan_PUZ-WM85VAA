@@ -1,9 +1,9 @@
-@startuml ATtiny1616_Dual_Channel_Interceptor_Schematic
+@startuml RP2350_Dual_Channel_Interceptor_Schematic
 !theme plain
 skinparam componentStyle uml2
 skinparam boxPadding 10
 
-title ATtiny1616 Dual-Channel Hardware Interceptor Circuit Schematic
+title RP2350 Dual-Channel Hardware Interceptor Circuit Schematic
 
 package "PUZ-WM85VAA Main Inverter Board Interface" {
   component [CNF1 Inverter Header\n(Upper Fan Output)] as CNF1_IN
@@ -14,15 +14,15 @@ package "Dual-Channel Interceptor Board" {
 
   package "Power Supply & Voltage Regulation" {
     component [15V Vcc_Logic Input] as Vcc15
-    component [LDO Regulator 15V->5V\n(78L05 / L78L05)] as LDO
+    component [LDO Regulator 15V->3.3V\n(LM1117-3.3 / AP63203)] as LDO
     component [Decoupling Capacitors\n100nF / 10uF] as Decoup
     Vcc15 -> LDO : "15V Input"
-    LDO -> Decoup : "5.0V VDD Line"
+    LDO -> Decoup : "3.3V VDD Line"
   }
 
   package "Channel 1 & 2 Analog Front-End (Vsp Attenuation)" {
-    component [Resistor Divider (0.6875x)\nR1=10k, R2=22k\n5.1V Zener Clamp] as Div12
-    component [Dual MCP6002 OpAmp Stage\n(Non-inverting Gain G=1.50)\nPowered from 15V Rail] as OpAmp12
+    component [Resistor Divider (0.50x)\nR1=10k, R2=10k\n3.3V Zener Clamp] as Div12
+    component [Dual MCP6002 OpAmp Stage\n(Non-inverting Gain G=2.00)\nPowered from 15V Rail] as OpAmp12
   }
 
   package "Channel 1 & 2 Digital Front-End (FG Tachometer)" {
@@ -31,7 +31,7 @@ package "Dual-Channel Interceptor Board" {
   }
 
   package "Microcontroller Core" {
-    component [ATtiny1616 Microcontroller\n- VDD: 5.0V\n- ADC0 / ADC1 (Vsp In)\n- DAC0 / DAC1 (Vsp Out)\n- TCB0 / TCB1 (FG Measure)\n- TCA0 PWM (FG Synth)\n- NTC Thermistor Input\n- WDT / Safety Logic] as MCU
+    component [RP2350 Microcontroller\n- VDD: 3.3V\n- ADC0 / ADC1 (Vsp In)\n- PWM / PIO (Vsp Out & FG Synth)\n- PIO / Timer (FG Measure)\n- NTC Thermistor Input\n- Dual Cortex-M33 / Hazard3 Cores\n- WDT / Safety Logic] as MCU
   }
 
   package "Protection & Fail-Safe Bypass" {
@@ -43,9 +43,9 @@ package "Dual-Channel Interceptor Board" {
   CNF2_IN --> Relay : "Vsp_in2 (0-6.5V), FG_out2"
 
   Relay --> Div12 : "Vsp_in (Normal Op)"
-  Div12 --> MCU : "Scaled ADC In (0-4.47V)"
+  Div12 --> MCU : "Scaled ADC In (0-3.25V)"
 
-  MCU --> OpAmp12 : "DAC Out (0-4.33V)"
+  MCU --> OpAmp12 : "PWM/DAC Out (0-3.25V)"
   OpAmp12 --> Relay : "Vsp_out (0-6.5V Amplified)"
 
   Relay --> Schmitt : "FG_in (0-5V Tach Pulse)"

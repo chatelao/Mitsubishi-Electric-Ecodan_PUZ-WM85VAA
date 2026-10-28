@@ -34,14 +34,14 @@ package "Outdoor Unit (PUZ-WM85VAA Inverter Chassis)" {
   }
 
   package "Stage 1 Dual-Channel Interceptor Board" {
-    [ATtiny1616 MCU] as InterceptorMCU
-    [OpAmp Gain Stage (G=1.5)] as OpAmp
+    [RP2350 MCU] as InterceptorMCU
+    [OpAmp Gain Stage (G=2.0)] as OpAmp
     [Open-Drain FG Drivers] as FGDriver
     [Fail-Safe NC Relay] as Relay
 
     CNF1_PCB ==> Relay : "Intercept Channels 1 & 2"
     CNF2_PCB ==> Relay
-    Relay -> InterceptorMCU : "Vsp_in (0.68x Div)"
+    Relay -> InterceptorMCU : "Vsp_in (0.50x Div)"
     InterceptorMCU -> OpAmp : "DAC Out"
     OpAmp -> Relay : "Vsp_out (0-6.5V)"
     InterceptorMCU -> FGDriver : "FG Synth (FG_in / k)"

@@ -1,6 +1,6 @@
 /**
  * @file interceptor_firmware.h
- * @brief ATtiny1616 Dual-Channel Interceptor Board Embedded Firmware Header
+ * @brief RP2350 Dual-Channel Interceptor Board Embedded Firmware Header
  */
 
 #ifndef INTERCEPTOR_FIRMWARE_H
@@ -10,8 +10,8 @@
 #include <stdbool.h>
 
 /* Hardware Constants & Ratios */
-#define DIVIDER_RATIO 0.6875f   /* R1=10k, R2=22k -> 22/32 */
-#define OPAMP_GAIN    1.50f     /* Non-inverting G = 1 + 10k/20k = 1.5 */
+#define DIVIDER_RATIO 0.50f     /* R1=10k, R2=10k -> 10/20 */
+#define OPAMP_GAIN    2.00f     /* Non-inverting G = 1 + 10k/10k = 2.0 */
 #define DEFAULT_K_ATTEN 0.68f   /* Acoustic attenuation factor */
 #define MIN_K_ATTEN    0.68f
 #define MAX_K_ATTEN    1.00f
@@ -22,11 +22,11 @@
 #define FG_STALL_FREQ_HZ_MIN   10.0f  /* Below this Hz while Vsp > 1.8V indicates stall */
 #define NTC_FREEZE_TEMP_C_MIN  -3.0f  /* T_evap below this triggers freeze override bypass */
 
-/* ATtiny1616 ADC / DAC Definitions (5.0V VDD Reference) */
-#define ADC_REF_VOLTAGE 5.00f
-#define ADC_MAX_COUNT   1023.0f
-#define DAC_MAX_COUNT   255.0f
-#define DAC_REF_VOLTAGE 4.34f
+/* RP2350 ADC / DAC / PWM Definitions (3.3V VDD Reference) */
+#define ADC_REF_VOLTAGE 3.30f
+#define ADC_MAX_COUNT   4095.0f
+#define DAC_MAX_COUNT   4095.0f
+#define DAC_REF_VOLTAGE 3.30f
 
 /* State Machine Modes */
 typedef enum {

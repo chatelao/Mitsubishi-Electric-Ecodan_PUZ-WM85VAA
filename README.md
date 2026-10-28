@@ -13,7 +13,7 @@ Lower operational outdoor fan noise (<35 dB(A) acoustic pressure at 3 meters dur
 ## Strategy: Inverted Staged Hybrid Approach
 
 1. **Stage 1 (Primary Execution)**:
-   - **Dual-Channel Hardware Signal Interceptor**: ATtiny1616-based inline hardware module installed on fan motor connectors `CNF1` and `CNF2` to attenuate speed commands ($V_{\text{sp}}$, 0–6.5V) while synthesizing feedback pulses ($FG$) to prevent `P8`/`P9` fault trips.
+   - **Dual-Channel Hardware Signal Interceptor**: RP2350-based inline hardware module installed on fan motor connectors `CNF1` and `CNF2` to attenuate speed commands ($V_{\text{sp}}$, 0–6.5V) while synthesizing feedback pulses ($FG$) to prevent `P8`/`P9` fault trips.
    - **FTC6 Indoor CN105 Load Capping**: Command injection over the indoor 2400/9600 bps 8E1 serial port to cap compressor thermal demand during nighttime hours.
 2. **Stage 2 (Secondary / Advanced)**:
    - **Firmware Reverse Engineering & Patching**: Decompile Renesas RX62T 32-bit MCU code flash in Ghidra v11.x, patch fan speed target lookup tables (`0xFFFD4120`), recalculate CRC-16-CCITT checksums via `/src/tools/patch_checksum.py`, and reflash ROM if the 128-bit ID-Code (`0xFFFFFFA0`) security gate is verified as unlocked.
