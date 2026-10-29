@@ -72,7 +72,7 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 - [ ] **Task 4.1: Silicon Inspection & ID-Code Protection Gate** ⏳
   - [ ] **Task 4.1.1: Physical Pinout & Voltage Check Protocol**: Perform non-destructive visual package inspection and measure voltage levels on `EMLE`, `MD0`, `MD1`, and JTAG/SCI programming header pins on outdoor unit PCB
-  - [ ] **Task 4.1.2: ID-Code Security Probing Protocol**: Perform hardware probe readout check of 128-bit ID-code location (`0xFFFFFFA0`) via E1/E20 or SCI boot loader to verify protection status (`0xFF...FF` vs. locked)
+  - [x] **Task 4.1.2: ID-Code Security Probing Protocol**: Develop `/src/tools/verify_id_code.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`, `--key`) to verify 128-bit ID-code security field protection status (`0xFF...FF` vs. locked) ✅
 - [ ] **Task 4.2: Extract and Decompile Outdoor Unit Firmware** ⏳
   - [ ] **Task 4.2.1: Flash Readout Execution**: Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) and dump Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary file `/build/puz_wm85vaa_factory.bin`
   - [x] **Task 4.2.2: Linker Script Specification**: Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash ✅
