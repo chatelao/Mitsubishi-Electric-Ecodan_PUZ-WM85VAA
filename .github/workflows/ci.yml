@@ -35,7 +35,7 @@ jobs:
         run: npx prettier --check "**/*.md"
 
       - name: Validate Python script syntax
-        run: python3 -m py_compile src/tools/*.py test/*.py
+        run: python3 -m py_compile src/firmware/*.py src/tools/*.py test/*.py
 
       - name: Validate C firmware compilation
         run: gcc -Wall -Wextra -Werror -c src/interceptor/interceptor_firmware.c -o /dev/null
@@ -64,3 +64,5 @@ jobs:
           PYTHONPATH=. python3 src/tools/cn105_controller.py -i build/cn105_test.bin -c -v
           # 9. Test nighttime capper schedule
           PYTHONPATH=. python3 src/tools/nighttime_capper.py --time "23:00" --demand-cap 75 -o build/nighttime_test.bin -v
+          # 10. Verify Ghidra RX62T memory layout initialization script
+          PYTHONPATH=. python3 src/firmware/ghidra_init_rx62t.py -i build/puz_wm85vaa_factory.bin -o build/ghidra_rx62t_layout.json -v
