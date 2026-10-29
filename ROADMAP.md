@@ -70,14 +70,15 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 
 ### Phase 4: Stage 2 Subsystem — Firmware Reverse Engineering & Decompilation ⏳
 
-- [ ] **Task 4.1: Silicon Inspection & ID-Code Protection Gate** ⏳
-  - [ ] **Task 4.1.1: Physical Pinout & Voltage Check Protocol**: Perform non-destructive visual package inspection and measure voltage levels on `EMLE`, `MD0`, `MD1`, and JTAG/SCI programming header pins on outdoor unit PCB
+- [x] **Task 4.1: Silicon Inspection & ID-Code Protection Gate** ✅
+  - [x] **Task 4.1.1: Physical Pinout & Voltage Check Protocol**: Document non-destructive visual package inspection, operating mode pin states (`EMLE`, `MD0`, `MD1`), voltage level checks, and safety lockout protocols in `/specification/physical_inspection_protocol.md` ✅
   - [x] **Task 4.1.2: ID-Code Security Probing Protocol**: Develop `/src/tools/verify_id_code.py` supporting CLI flags (`-i/--input`, `-o/--output`, `-c/--check-only`, `-v/--verbose`, `--key`) to verify 128-bit ID-code security field protection status (`0xFF...FF` vs. locked) ✅
 - [ ] **Task 4.2: Extract and Decompile Outdoor Unit Firmware** ⏳
-  - [ ] **Task 4.2.1: Flash Readout Execution**: Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) and dump Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary file `/build/puz_wm85vaa_factory.bin`
-  - [x] **Task 4.2.2: Linker Script Specification**: Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash ✅
-  - [x] **Task 4.2.3: Synthetic Factory Binary Generator**: Develop `/src/tools/generate_factory_rom.py` supporting CLI flags (`-o/--output`, `-c/--check-only`, `-v/--verbose`) to produce factory ROM binary for emulation testing ✅
-  - [x] **Task 4.2.4: Decompiler Environment Initialization**: Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script `/src/firmware/ghidra_init_rx62t.py` ✅
+  - [ ] **Task 4.2.1: Flash Readout Execution & Programmer Verification**: Connect hardware programmer (e.g. Renesas E1/E20 or SCI boot tool) to service header, execute flash readout sequence, and dump Code Flash ROM (`0xFFFC0000`–`0xFFFFFFFF`) into binary file `/build/puz_wm85vaa_factory.bin`
+  - [ ] **Task 4.2.2: Flash Dump Integrity Check**: Validate dumped flash size (256 KB) and verify initial reset vector (`0xFFFFFFFC`) and CRC-16 checksum using `/src/tools/generate_factory_rom.py -c`
+  - [x] **Task 4.2.3: Linker Script Specification**: Prepare custom Renesas RX linker script `/src/firmware/rx62t_rom.ld` mapping SRAM, SFRs, Data Flash, and Code Flash ✅
+  - [x] **Task 4.2.4: Synthetic Factory Binary Generator**: Develop `/src/tools/generate_factory_rom.py` supporting CLI flags (`-o/--output`, `-c/--check-only`, `-v/--verbose`) to produce factory ROM binary for emulation testing ✅
+  - [x] **Task 4.2.5: Decompiler Environment Initialization**: Initialize Ghidra v11.x project using Renesas RX processor module and load memory layout script `/src/firmware/ghidra_init_rx62t.py` ✅
 - [ ] **Task 4.3: Map Fan Target RPM Tables & Closed-Loop Safety Guards** ⏳
   - [ ] **Task 4.3.1: Fan Target RPM Table Identification**: Map target RPM lookup table array at `0xFFFD4120` in Ghidra and verify 16-entry `uint16_t` matrix structure
   - [ ] **Task 4.3.2: Suction Superheat Safeguard Disassembly**: Disassemble suction superheat collapse protection subroutine ($\Delta T_{\text{SH}} < 3.5\text{ K} \implies$ ramp RPM to 1150)
@@ -104,11 +105,13 @@ This roadmap outlines the implementation phases, objectives, and task schedule f
 - [ ] **Task 6.1: Hardware Deployment & Reflashing** ⏳
   - [ ] **Task 6.1.1: Physical Mounting & Signal Harnessing**: Mount Stage 1 Dual-Channel Hardware Interceptor PCB on outdoor unit housing and connect inline harnesses to `CNF1` and `CNF2` connectors
   - [ ] **Task 6.1.2: Unpowered Relay Bypass Continuity Check**: Verify NC DPDT fail-safe relay unpowered bypass continuity across $V_{\text{sp}}$ and $FG$ signal lines
-  - [ ] **Task 6.1.3: MCU Reflashing Procedure**: Reflash patched firmware onto Renesas RX62T MCU via programming header (if Stage 2 path is validated)
-  - [ ] **Task 6.1.4: Power-On Self-Test (POST) Verification**: Perform initial power-on self-test and verify diagnostic LEDs and status flags
+  - [ ] **Task 6.1.3: Bench Power-On Diagnostic Check**: Apply 15V logic power to interceptor PCB on bench and verify LED status flags and 3.3V power rail regulation
+  - [ ] **Task 6.1.4: MCU Reflashing Procedure**: Reflash patched firmware onto Renesas RX62T MCU via programming header (if Stage 2 path is validated)
+  - [ ] **Task 6.1.5: Power-On Self-Test (POST) Verification**: Perform initial power-on self-test and verify diagnostic LEDs and status flags
 - [ ] **Task 6.2: Operational, Acoustic & Safety Verification** ⏳
   - [ ] **Task 6.2.1: Outdoor Acoustic Sound Pressure Measurement**: Measure outdoor sound pressure level (SPL) at 3 meters during peak heating demand using calibrated Class 1 sound level meter
   - [ ] **Task 6.2.2: Acoustic Ceiling Target Compliance**: Confirm sound pressure level remains below $35\text{ dB(A)}$ target at 3 meters under nighttime high-demand conditions
   - [ ] **Task 6.2.3: Active Defrost Cycle Field Trial**: Perform low-ambient frost chamber trial to trigger active defrost cycles and verify unconstrained airflow execution
-  - [ ] **Task 6.2.4: FTC6 Fault Telemetry Audit**: Verify zero diagnostic error codes (`P8` fan tachometer fault, `P9` fan motor abnormality, or refrigerant circuit alarms)
-  - [x] **Task 6.2.5: Field Test & Acoustic Validation Specification**: Compile field verification log and acoustic performance validation report in `/specification/field_test_report.md` ✅
+  - [ ] **Task 6.2.4: Forced Superheat Collapse Field Trial**: Induce low suction superheat ($\Delta T_{\text{SH}} < 3.5\text{ K}$) and confirm automatic fan speed override restoration to 1150 RPM
+  - [ ] **Task 6.2.5: FTC6 Fault Telemetry Audit**: Verify zero diagnostic error codes (`P8` fan tachometer fault, `P9` fan motor abnormality, or refrigerant circuit alarms)
+  - [x] **Task 6.2.6: Field Test & Acoustic Validation Specification**: Compile field verification log and acoustic performance validation report in `/specification/field_test_report.md` ✅
