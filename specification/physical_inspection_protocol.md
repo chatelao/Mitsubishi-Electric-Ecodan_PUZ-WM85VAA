@@ -47,8 +47,8 @@ The Renesas RX62T MCU operating mode is established at power-on reset based on t
 
 ### 3.1 Signal Thresholds ($V_{\text{CC}} = 5.0\text{V}$ Nominal)
 
-- **Input Logic High ($V_{\text{IH}}$)**: $\ge 0.8 \times V_{\text{CC}} = 4.00\text{V}$ (Target: $5.0\text{V}$)
-- **Input Logic Low ($V_{\text{IL}}$)**: $\le 0.2 \times V_{\text{CC}} = 1.00\text{V}$ (Target: $0.0\text{V}$)
+- **Input Logic High ($V\_{\text{IH}}$)**: $\ge 0.8 \times V_{\text{CC}} = 4.00\text{V}$ (Target: $5.0\text{V}$)
+- **Input Logic Low ($V\_{\text{IL}}$)**: $\le 0.2 \times V_{\text{CC}} = 1.00\text{V}$ (Target: $0.0\text{V}$)
 - **Reset Pin (`RES#`, Pin 10)**: Active LOW with internal pull-up. Pull `RES#` to $0\text{V}$ for $> 2\text{ ms}$ to initiate mode transition.
 
 ---
